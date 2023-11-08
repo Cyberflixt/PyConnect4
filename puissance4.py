@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter.colorchooser import askcolor
 
-
+references = [] # tkinter supprime les images, si elles ne sont pas stockés, ez
 
 class Accueil:
     def __init__(self):
@@ -22,12 +22,14 @@ class Accueil:
         
         # Bouton "Jouer Local"
         photo1 = tk.PhotoImage(file = "btnLocal.png")
+        references.append(photo1)
         photo2 = tk.PhotoImage(file = "btnOnline.png")
-        play_local_button = tk.Button(self.window, command=self.start_local_game, image = photo1)
+        references.append(photo2)
+        play_local_button = tk.Button(self.window, image = photo1, command=self.start_local_game)
         play_local_button.pack()
         
         # Bouton "Jouer En Ligne"
-        play_online_button = tk.Button(self.window, command=self.start_online_game, image = photo2)
+        play_online_button = tk.Button(self.window, image = photo2, command=self.start_online_game)
         play_online_button.pack()
     
     def start_local_game(self):
@@ -42,6 +44,7 @@ class Puissance4:
     def __init__(self):
         self.window = tk.Tk()
         self.window.title("Puissance 4")
+        
         self.board = [[0] * 7 for _ in range(6)]
         self.current_player = 0
         self.colors = {0: "white", 1: "red", 2: "yellow"}
@@ -119,22 +122,56 @@ class Puissance4:
             self.label.config(text="Cliquez sur 'Démarrer' pour commencer la partie")
             return
 
-        for i in range(5, -1, -1):
-            if self.board[i][col] == 0:
-                self.board[i][col] = self.current_player
-                self.canvas.create_oval(60 * col + 10, 60 * i + 60, 60 * col + 70, 60 * i + 120, outline="black", fill=self.colors[self.current_player])
-                self.remaining_pions[self.current_player] -= 1
+        i = 5
+        while i>0 and self.board[i][col] != 0:
+            i -= 1
+            
+        if self.board[i][col] == 0:
+            self.board[i][col] = self.current_player
+            self.canvas.create_oval(60 * col + 10, 60 * i + 60, 60 * col + 70, 60 * i + 120, outline="black", fill=self.colors[self.current_player])
+            self.remaining_pions[self.current_player] -= 1
                 
-                if self.check_win(i, col):
-                    self.display_winner()
-                elif sum(self.remaining_pions.values()) == 0:
-                    self.label.config(text="Match nul!")
-                    self.canvas.unbind("<Button-1>")
-                else:
-                    self.current_player = 3 - self.current_player
-                    self.label.config(text=f"Tour du joueur {self.current_player}")
-                    self.show_player_label(self.current_player)
-                break
+            if self.check_win(i, col):
+                self.display_winner()
+            elif sum(self.remaining_pions.values()) == 0:
+                self.label.config(text="Match nul!")
+                self.canvas.unbind("<Button-1>")
+            else:
+                self.current_player = 3 - self.current_player
+                self.label.config(text=f"Tour du joueur {self.current_player}")
+                self.show_player_label(self.current_player)
+
+    def check_win(self, x, y):
+        directions = [(1, 0), (1,1), (0, 1), (-1, 1), (-1, 0), (-1,-1), (0,-1), (1,-1)]
+        for d in directions:
+            correct = True
+            for i in range(4):
+                pass
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     def choose_color(self, player):
         if not self.started:
@@ -172,6 +209,7 @@ class Puissance4:
         self.center_message.config(text=f"Joueur {self.current_player} a gagné!", fg=self.colors[self.current_player])
         self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.canvas.unbind("<Button-1>")
+    
 
 if __name__ == "__main__":
     accueil = Accueil()
