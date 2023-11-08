@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter.colorchooser import askcolor
 
+
 class Accueil:
     def __init__(self):
         self.window = tk.Tk()
