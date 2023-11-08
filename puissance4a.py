@@ -142,74 +142,13 @@ class Puissance4:
                 self.show_player_label(self.current_player)
 
     def check_win(self, x, y):
-        directions = [(1, 0), (1,1), (0, 1), (-1, 1), (-1, 0), (-1,-1), (0,-1), (1,-1)]
+        directions = [(1, 0), (1,1), (0, 1), (-1, 1)]
         for d in directions:
             correct = True
-            for i in range(4):
-                pass
+            for i in range(-3,4):
+                if correct:
+                    if self.board[y + d[1]*i][x + d[0]*i] != self.current_player:
+                        correct = False
+            if correct:
+                return True
             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    def choose_color(self, player):
-        if not self.started:
-            color = askcolor(title=f"Choisir une couleur pour Joueur {player}")[1]
-            if color:
-                self.colors[player] = color
-                if player == 1:
-                    self.left_color_button.config(state=tk.DISABLED)
-                else:
-                    self.right_color_button.config(state=tk.DISABLED)
-        else:
-            self.label.config(text="La partie a déjà commencé. Impossible de changer de couleur.")
-    
-    def check_win(self, row, col):
-        directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
-        for dr, dc in directions:
-            count = 1
-            for sign in [-1, 1]:
-                r, c = row, col
-                while 0 <= r + dr * sign < 6 and 0 <= c + dc * sign < 7 and self.board[r + dr * sign][c + dc * sign] == self.current_player:
-                    count += 1
-                    r, c = r + dr * sign, c + dc * sign
-                    if count >= 4:
-                        return True
-        return False
-    
-    def show_player_label(self, player):
-        for p in self.player_labels:
-            if p == player:
-                self.player_labels[p].config(bg=self.colors[player])
-            else:
-                self.player_labels[p].config(bg="SystemButtonFace")
-    
-    def display_winner(self):
-        self.center_message.config(text=f"Joueur {self.current_player} a gagné!", fg=self.colors[self.current_player])
-        self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        self.canvas.unbind("<Button-1>")
-    
-
-if __name__ == "__main__":
-    accueil = Accueil()
