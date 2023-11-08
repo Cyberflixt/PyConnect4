@@ -29,7 +29,7 @@ class Accueil:
     
     def start_local_game(self):
         self.window.destroy()  # Fermer la fenêtre d'accueil
-        puissance4 = Puissance4()  # Démarrer le jeu Puissance 4
+        puissance4 = Puissance4()  # Démarrer le jeu
     
     def start_online_game(self):
         # Ajouter la logique pour le jeu en ligne ici
