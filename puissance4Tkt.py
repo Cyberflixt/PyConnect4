@@ -25,11 +25,11 @@ class Accueil:
         references.append(photo1)
         photo2 = tk.PhotoImage(file = "btnOnline.png")
         references.append(photo2)
-        play_local_button = tk.Button(self.window, image = photo1, command=self.start_local_game)
+        play_local_button = tk.Button(self.window, highlightthickness = 0, bd = 0, image = photo1, command=self.start_local_game)
         play_local_button.pack()
         
         # Bouton "Jouer En Ligne"
-        play_online_button = tk.Button(self.window, image = photo2, command=self.start_online_game)
+        play_online_button = tk.Button(self.window, highlightthickness = 0, bd = 0, image = photo2, command=self.start_online_game)
         play_online_button.pack()
     
     def start_local_game(self):
