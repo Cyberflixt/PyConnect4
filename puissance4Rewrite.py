@@ -46,7 +46,12 @@ class Puissance4:
         self.window = tk.Tk()
         self.window.title("Puissance 4")
         
-        self.board = [[0] * 7 for _ in range(6)]
+        self.pions = [[0] * 6 for i in range(7)] # 7 colonnes, 6 lignes
+        self.taille = [7,6]
+        
+
+        self.taille_pion = 60 # pixels
+        
         self.current_player = 0
         self.colors = {0: "white", 1: "red", 2: "yellow"}
         self.remaining_pions = {1: 21, 2: 21}
@@ -55,6 +60,19 @@ class Puissance4:
         self.player_labels = {1: None, 2: None}
         
         self.create_gui()
+
+    def creer_pion(self, x,y, couleur):
+        px = x * self.taille_pion + 60
+        py = y * self.taille_pion + 60
+        pion = self.canvas.create_oval(
+            px,
+            py,
+            px + self.taille_pion,
+            py + self.taille_pion,
+            outline = "black",
+            fill = couleur
+        )
+        return pion
     
     def create_gui(self):
         # Espace pour l'image en haut
@@ -76,7 +94,7 @@ class Puissance4:
         left_label.pack()
         left_pions = tk.Label(left_space, text=f"Pions restants: {self.remaining_pions[1]}", font=("Arial", 12))
         left_pions.pack()
-        self.left_color_button = tk.Button(left_space, text="Choisir Couleur", command=lambda: self.choose_color(1))
+        self.left_color_button = tk.Button(left_space, text="Choisir Couleur", command=lambda: self.choisir_couleur(1))
         self.left_color_button.pack()
         self.player_labels[1] = left_label
         
@@ -87,7 +105,7 @@ class Puissance4:
         right_label.pack()
         right_pions = tk.Label(right_space, text=f"Pions restants: {self.remaining_pions[2]}", font=("Arial", 12))
         right_pions.pack()
-        self.right_color_button = tk.Button(right_space, text="Choisir Couleur", command=lambda: self.choose_color(2))
+        self.right_color_button = tk.Button(right_space, text="Choisir Couleur", command=lambda: self.choisir_couleur(2))
         self.right_color_button.pack()
         self.player_labels[2] = right_label
         
@@ -97,12 +115,17 @@ class Puissance4:
         self.center_message = tk.Label(self.window, text="", font=("Arial", 20), bg="white", relief=tk.SOLID, borderwidth=2)
         self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.center_message.place_forget()
-        
-        for i in range(6):
-            for j in range(7):
-                self.canvas.create_oval(60 * j + 10, 60 * i + 60, 60 * j + 70, 60 * i + 120, outline="black", fill="white")
-                self.canvas.tag_bind(self.canvas.create_oval(60 * j + 10, 60 * i + 60, 60 * j + 70, 60 * i + 120, outline="black", fill="white"),
-                    "<Button-1>", lambda event, row=i, col=j: self.drop_pion(col))
+
+        # création des emplacements libres
+        for x in range(self.taille[0]):
+            for y in range(self.taille[1]):
+                emplacement = self.creer_pion(x,y,"white")
+                
+                self.canvas.tag_bind(
+                    emplacement,
+                    "<Button-1>",
+                    lambda event, i=x: self.placer_pion(i)
+                )
         
         self.window.geometry("800x700")  # Taille initiale de la fenêtre
         self.window.mainloop()
@@ -118,31 +141,40 @@ class Puissance4:
         else:
             self.label.config(text="La partie a déjà commencé.")
     
-    def drop_pion(self, col):
+    def placer_pion(self, x):
         if not self.started:
             self.label.config(text="Cliquez sur 'Démarrer' pour commencer la partie")
             return
 
-        i = 5
-        while i>0 and self.board[i][col] != 0:
-            i -= 1
-            
-        if self.board[i][col] == 0:
-            self.board[i][col] = self.current_player
-            self.canvas.create_oval(60 * col + 10, 60 * i + 60, 60 * col + 70, 60 * i + 120, outline="black", fill=self.colors[self.current_player])
+        # on cherche la position y libre en partant du bas
+        y = self.taille[1]-1
+        while y>=0 and self.pions[x][y] != 0:
+            y -= 1
+
+        # si le y trouvé n'est pas en dehors de la grille
+        if y>=0:
+            # alors on place le pion
+            self.pions[x][y] = self.current_player
+            self.creer_pion(x,y, self.colors[self.current_player])
             self.remaining_pions[self.current_player] -= 1
-                
-            if self.check_win(i, col):
-                self.display_winner()
+
+            # le pion placé a-t'il permit de gagner?
+            if self.verifier_gagnant(x,y):
+                # joueur à gagné
+                self.afficher_gagnant()
+
+            # pas de pion en reserve?
             elif sum(self.remaining_pions.values()) == 0:
+                # match nul
                 self.label.config(text="Match nul!")
                 self.canvas.unbind("<Button-1>")
             else:
+                # tour suivant
                 self.current_player = 3 - self.current_player
                 self.label.config(text=f"Tour du joueur {self.current_player}")
                 self.show_player_label(self.current_player)
 
-    def choose_color(self, player):
+    def choisir_couleur(self, player):
         if not self.started:
             color = askcolor(title=f"Choisir une couleur pour Joueur {player}")[1]
             if color:
@@ -154,16 +186,17 @@ class Puissance4:
         else:
             self.label.config(text="La partie a déjà commencé. Impossible de changer de couleur.")
 
-    def check_win(self, x, y):
+    def verifier_gagnant(self, x, y):
         directions = [(1, 0), (1,1), (0, 1), (-1, 1), (-1,0), (-1, -1), (0,-1), (1,-1)]
         for dir_x, dir_y in directions:
             pions_aligne = 0
             for i in range(4):
                 pos_x = x + dir_x*i
                 pos_y = y + dir_y*i
-                if 0 <= pos_x < 6 and 0 <= pos_y < 7:
-                    if self.board[pos_x][pos_y] == self.current_player:
+                if 0 <= pos_x < self.taille[0] and 0 <= pos_y < self.taille[1]:
+                    if self.pions[pos_x][pos_y] == self.current_player:
                         pions_aligne += 1
+                    #break # inutile de continuer si on cherche hors de la grille
                 
             if pions_aligne==4:
                 return True
@@ -175,7 +208,7 @@ class Puissance4:
             else:
                 self.player_labels[p].config(bg="SystemButtonFace")
     
-    def display_winner(self):
+    def afficher_gagnant(self):
         self.center_message.config(text=f"Joueur {self.current_player} a gagné!", fg=self.colors[self.current_player])
         self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.canvas.unbind("<Button-1>")
