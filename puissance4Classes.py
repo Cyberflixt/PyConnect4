@@ -11,10 +11,16 @@ class Joueur:
         self.pions_restants = 21
         self.nom = f'Joueur {i+1}'
 
-        self.label = None # label tkinter
+        self.label = None # label tkinter du nom du joueur
+        self.label_pion = None # label tkinter du nombre de pions
         
         colors = ["red", "yellow"]
         self.couleur = colors[i]
+
+    def enlever_pion(self):
+        self.pions_restants -= 1
+        self.label_pion.config(text = f"Pions restants: {self.pions_restants}")
+        return self.pions_restants
 
 class Pion:
     def __init__(self, canvas, x,y):
@@ -28,7 +34,7 @@ class Pion:
         self.image = self.afficher_pion()
 
     def afficher_pion(self):
-        px = self.x * self.taille_pion + 60
+        px = self.x * self.taille_pion + 145
         py = self.y * self.taille_pion + 60
         
         couleur = "white"
@@ -51,5 +57,7 @@ class Pion:
         self.joueur = joueur
         self.canvas.itemconfig(self.image, fill = couleur)
 
-        self.joueur.pions_restants -= 1
-        return self.joueur.pions_restants
+        return self.joueur.enlever_pion()
+
+    def supprimer(self):
+        self.canvas.delete(self.image)

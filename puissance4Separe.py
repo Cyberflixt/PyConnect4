@@ -60,6 +60,7 @@ class Puissance4:
         self.started = False  # Variable pour suivre l'état de démarrage
         self.winner_message = None
         
+        
         self.create_gui()
     
     def create_gui(self):
@@ -85,6 +86,7 @@ class Puissance4:
         self.left_color_button = tk.Button(left_space, text="Choisir Couleur", command=lambda: self.choisir_couleur(1))
         self.left_color_button.pack()
         self.joueurs[0].label = left_label
+        self.joueurs[0].label_pion = left_pions
         
         # Espace pour "Joueur 2" à droite
         right_space = tk.Frame(self.window, width=50)
@@ -96,7 +98,9 @@ class Puissance4:
         self.right_color_button = tk.Button(right_space, text="Choisir Couleur", command=lambda: self.choisir_couleur(2))
         self.right_color_button.pack()
         self.joueurs[1].label = right_label
-        
+        self.joueurs[1].label_pion = right_pions
+
+        # Texte affichant l'aide
         self.label = tk.Label(self.window, text="Cliquez sur 'Démarrer' pour commencer la partie")
         self.label.pack()
         
@@ -104,6 +108,21 @@ class Puissance4:
         self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.center_message.place_forget()
 
+        self.vider_pions()
+
+        self.window.geometry("800x700")  # Taille initiale de la fenêtre
+        self.window.mainloop()
+
+    def supprimer_pions(self):
+        for col in self.pions:
+            if col:
+                for pion in col:
+                    pion.supprimer()
+        self.pions = []
+        
+    def vider_pions(self):
+        self.supprimer_pions()
+        
         # création des emplacements libres
         for x in range(self.taille[0]):
             col = []
@@ -117,13 +136,13 @@ class Puissance4:
                     lambda event, i=x: self.placer_pion(i)
                 )
             self.pions.append(col)
-        
-        self.window.geometry("800x700")  # Taille initiale de la fenêtre
-        self.window.mainloop()
     
     def start_game(self):
         if not self.started:
             self.started = True
+            self.vider_pions()
+            #print('restesretr')
+            self.afficher_gagnant(False)
             
             # Définir le premier joueur après le démarrage
             self.joueur_actuel = self.joueurs[0]
@@ -154,13 +173,12 @@ class Puissance4:
             
             # le pion placé a-t'il permit de gagner?
             if self.verifier_gagnant(x,y):
-                self.afficher_gagnant() # joueur à gagné
+                self.afficher_gagnant(self.joueur_actuel) # joueur à gagné
 
             # pas de pion en reserve?
             elif pions_restant == 0:
                 # match nul
                 self.label.config(text="Match nul!")
-                self.canvas.unbind("<Button-1>")
             else:
                 # tour suivant
                 self.tour_suivant()
@@ -171,7 +189,7 @@ class Puissance4:
         self.joueur_actuel = self.joueurs[i]
 
         # actualiser l'interface
-        self.label.config(text="Tour de "+self.joueur_actuel.nom)
+        self.label.config(text = "Tour de "+self.joueur_actuel.nom)
         self.show_player_label(self.joueur_actuel)
                 
     def choisir_couleur(self, player):
@@ -207,10 +225,18 @@ class Puissance4:
             else:
                 joueur.label.config(bg = "SystemButtonFace")#Met le label joueur a qui ce n'est pas le tour de la couleur de base
     
-    def afficher_gagnant(self):
-        self.center_message.config(text=f"{self.joueur_actuel.nom} a gagné!", fg = self.joueur_actuel.couleur)#le joueur qui a gagné est le joueur qui vient de placer le pion, donc le joueur actuel est appelé pour la victoire
-        self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)#le message est placé au centre de l'écran
-        self.canvas.unbind("<Button-1>") #on empeche le joueur de placer des pions lorsque l'écran de victoire est actif
+    def afficher_gagnant(self, joueur):
+        if joueur:
+            print("palced")
+            self.started = False
+            self.center_message.config(text=f"{self.joueur_actuel.nom} a gagné!", fg = self.joueur_actuel.couleur)#le joueur qui a gagné est le joueur qui vient de placer le pion, donc le joueur actuel est appelé pour la victoire
+            self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)#le message est placé au centre de l'écran
+        else:
+            self.center_message.place_forget()
+            print("forgor")
+        
+
+        
     
 
 if __name__ == "__main__":
