@@ -3,115 +3,128 @@ import tkinter as tk
 from tkinter.colorchooser import askcolor
 from puissance4Classes import *
 
-references = [] # tkinter supprime les images, si elles ne sont pas stockés, ez
-
 class Accueil:
     def __init__(self):
-        self.window = tk.Tk()
-        self.window.title("Accueil")
+        # Création de la fenêtre tkinter
+        self.fen = tk.Tk()
+        self.fen.attributes('-fullscreen', True)
+        self.fen.title("Accueil")
         
         self.create_gui()
     
     def create_gui(self):
-        # Ecran d'accueil avec image au milieu
-        welcome_label = tk.Label(self.window, text="", font=("Arial", 20))
-        welcome_label.pack()
-        
+        # Création de l'apparence du menu principale
+        # Image du titre du jeu au centre
         image = tk.PhotoImage(file="menu.png") 
-        image_label = tk.Label(self.window, image=image)
-        image_label.image = image
-        image_label.pack()
+        image_menu = tk.Label(self.fen, image=image)
+        image_menu.image = image
+        image_menu.pack()
         
         # Bouton "Jouer Local"
-        photo1 = tk.PhotoImage(file = "btnLocal.png")
-        references.append(photo1)
-        photo2 = tk.PhotoImage(file = "btnOnline.png")
-        references.append(photo2)
-        play_local_button = tk.Button(self.window, image = photo1, command=self.start_local_game)
-        play_local_button.pack()
+        img_btn_local = tk.PhotoImage(file = "btnLocal.png")
+        btn_local = tk.Button(self.fen, image = img_btn_local, command=self.demarrer_local)
+        btn_local.image = img_btn_local
+        btn_local.pack()
         
         # Bouton "Jouer En Ligne"
-        play_online_button = tk.Button(self.window, image = photo2, command=self.start_online_game)
-        play_online_button.pack()
+        img_btn_internet = tk.PhotoImage(file = "btnOnline.png")
+        btn_internet = tk.Button(self.fen, image = img_btn_internet, command=self.demarrer_internet)
+        btn_internet.image = img_btn_internet
+        btn_internet.pack()
     
-    def start_local_game(self):
-        self.window.destroy()  # Fermer la fenêtre d'accueil
-        puissance4 = Puissance4()  # Démarrer le jeu Puissance 4
+    def demarrer_local(self):
+        self.fen.destroy()  # Fermer la fenêtre d'accueil
+        jeu = Jeu()  # Démarrer le jeu Puissance 4
     
-    def start_online_game(self):
-        # 
-        pass
+    def demarrer_internet(self):
+        self.fen.destroy()  # Fermer la fenêtre d'accueil
+        jeu = Jeu(True)  # Démarrer le jeu Puissance 4
 
-class Puissance4:
-    def __init__(self):
-        self.window = tk.Tk()
-        self.window.title("Puissance 4")
-        
-        self.pions = []
+class Jeu:
+    def __init__(self, internet = False):
+        # création de la fenetre tkinter
+        self.fen = tk.Tk()
+        self.fen.attributes('-fullscreen', True)
+
+        # changement du titre "local" ou "en ligne"
+        self.internet = internet # mode en ligne
+        if internet:
+            self.fen.title("Puissance 4 Local")
+        else:
+            self.fen.title("Puissance 4 En ligne")
+
+        # Attributs constants de Jeu 
         self.taille = [7,6]
-        
-
         self.taille_pion = 60 # pixels
 
-        # crée le joueur 1 et le joueur 2
+        # Tableau de tableau, remplit quand la partie commence
+        self.pions = []
+        
+        # Crée le joueur 1 et le joueur 2
         self.joueurs = [Joueur(self, i) for i in range(2)]
+        self.joueur_actuel = None
         
-        self.joueur_actuel = self.joueurs[0]
-        self.started = False  # Variable pour suivre l'état de démarrage
-        self.winner_message = None
-        
+        self.debut = False  # Variable pour suivre l'état de démarrage        
         
         self.create_gui()
     
     def create_gui(self):
         # Espace pour l'image en haut
-        top_space = tk.Frame(self.window, height=50)
-        top_space.pack(fill=tk.BOTH, expand=True)
+        espace = tk.Frame(self.fen, height=50)
+        espace.pack(fill=tk.BOTH, expand=True)
         
         # Bouton "Démarrer" pour commencer la partie
-        start_button = tk.Button(top_space, text="Démarrer", command=self.start_game)
-        start_button.pack()
+        btn_demarrer = tk.Button(espace, text="Démarrer", command=self.commencer_partie)
+        btn_demarrer.pack()
         
         # Grille centrale
-        self.canvas = tk.Canvas(self.window, width=700, height=600)
+        self.canvas = tk.Canvas(self.fen, width=700, height=600)
         self.canvas.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        
-        # Espace pour "Joueur 1" à gauche
-        left_space = tk.Frame(self.window, width=50)
-        left_space.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        left_label = tk.Label(left_space, text="Joueur 1", font=("Arial", 14))
-        left_label.pack()
-        left_pions = tk.Label(left_space, text=f"Pions restants: {self.joueurs[0].pions_restants}", font=("Arial", 12))
-        left_pions.pack()
-        self.left_color_button = tk.Button(left_space, text="Choisir Couleur", command=lambda: self.choisir_couleur(1))
-        self.left_color_button.pack()
-        self.joueurs[0].label = left_label
-        self.joueurs[0].label_pion = left_pions
-        
-        # Espace pour "Joueur 2" à droite
-        right_space = tk.Frame(self.window, width=50)
-        right_space.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-        right_label = tk.Label(right_space, text="Joueur 2", font=("Arial", 14))
-        right_label.pack()
-        right_pions = tk.Label(right_space, text=f"Pions restants: {self.joueurs[1].pions_restants}", font=("Arial", 12))
-        right_pions.pack()
-        self.right_color_button = tk.Button(right_space, text="Choisir Couleur", command=lambda: self.choisir_couleur(2))
-        self.right_color_button.pack()
-        self.joueurs[1].label = right_label
-        self.joueurs[1].label_pion = right_pions
+
+        # Création des élements symmétriques pour chaque joueur
+        for i in range(2):
+            joueur = self.joueurs[i]
+
+            # Coté de l'interface du joueur
+            tk_side = tk.LEFT
+            if i==1:
+                tk_side = tk.RIGHT
+
+            # Encadrage des elements
+            cadre = tk.Frame(self.fen, width=50)
+            cadre.pack(side=tk_side, fill=tk.BOTH, expand=True)
+
+            # Texte avec le nom du joueur
+            label_nom = tk.Label(cadre, text=joueur.nom, font=("Arial", 14))
+            label_nom.pack()
+
+            # Texte avec le nombre de pions restants du joueur
+            label_pions = tk.Label(cadre, text="", font=("Arial", 12))
+            label_pions.pack()
+
+            # Bouton pour changer la couleur du joueur
+            btn_couleur = tk.Button(cadre, text="Choisir Couleur", command = joueur.choisir_couleur)
+            btn_couleur.pack()
+            
+            joueur.label = label_nom
+            joueur.label_pions = label_pions
+            joueur.btn_couleur = btn_couleur
+
+            joueur.rafraichir_pions()
+            joueur.afficher_couleur(True)
 
         # Texte affichant l'aide
-        self.label = tk.Label(self.window, text="Cliquez sur 'Démarrer' pour commencer la partie")
+        self.label = tk.Label(self.fen, text="Cliquez sur 'Démarrer' pour commencer la partie")
         self.label.pack()
-        
-        self.center_message = tk.Label(self.window, text="", font=("Arial", 20), bg="white", relief=tk.SOLID, borderwidth=2)
-        self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        self.center_message.place_forget()
 
+        # Message centré (affiché uniquement pour annoncer le gagnant)
+        self.message_centre = tk.Label(self.fen, text="", font=("Arial", 20), bg="white", relief=tk.SOLID, borderwidth=2)
+
+        # Remplit le canvas d'emplacements vides
         self.vider_pions()
 
-        self.window.geometry("800x700")  # Taille initiale de la fenêtre
-        self.window.mainloop()
+        #self.fen.geometry("800x700") # Taille initiale de la fenêtre
+        self.fen.mainloop()
 
     def supprimer_pions(self):
         for col in self.pions:
@@ -123,7 +136,7 @@ class Puissance4:
     def vider_pions(self):
         self.supprimer_pions()
         
-        # création des emplacements libres
+        # Création des emplacements libres
         for x in range(self.taille[0]):
             col = []
             for y in range(self.taille[1]):
@@ -137,26 +150,24 @@ class Puissance4:
                 )
             self.pions.append(col)
     
-    def start_game(self):
-        if not self.started:
-            self.started = True
-            self.vider_pions()
-            #print('restesretr')
-            self.afficher_gagnant(False)
+    def commencer_partie(self):
+        if not self.debut:
+            self.debut = True            # débute la partie
+            self.vider_pions()           # enleve les pions précédants
+            self.afficher_gagnant(False) # cache le gagnant précédant
             
-            # Définir le premier joueur après le démarrage
-            self.joueur_actuel = self.joueurs[0]
-            self.label.config(text=f"Tour du {self.joueur_actuel.nom}")
-
             # Désactiver le changement de couleur
-            self.left_color_button.config(state=tk.DISABLED)
-            self.right_color_button.config(state=tk.DISABLED)
-            self.show_player_label(1)
+            for player in self.joueurs:
+                player.btn_couleur.config(state=tk.DISABLED)
+
+            # Passage au tour du premier joueur
+            self.joueur_actuel = self.joueurs[1]
+            self.tour_suivant()
         else:
             self.label.config(text="La partie a déjà commencé.")
     
     def placer_pion(self, x):
-        if not self.started:
+        if not self.debut:
             self.label.config(text="Cliquez sur 'Démarrer' pour commencer la partie")
             return
 
@@ -184,56 +195,61 @@ class Puissance4:
                 self.tour_suivant()
     
     def tour_suivant(self):
-        # tour suivant
+        # Passage au joueur suivant
         i = 1 - self.joueur_actuel.i
         self.joueur_actuel = self.joueurs[i]
 
-        # actualiser l'interface
-        self.label.config(text = "Tour de "+self.joueur_actuel.nom)
-        self.show_player_label(self.joueur_actuel)
-                
-    def choisir_couleur(self, player):
-        if not self.started:
-            color = askcolor(title=f"Choisir une couleur pour Joueur {player}")[1]
-            if color:
-                self.colors[player] = color
-                if player == 1:
-                    self.left_color_button.config(state=tk.DISABLED)
-                else:
-                    self.right_color_button.config(state=tk.DISABLED)
-        else:
-            self.label.config(text="La partie a déjà commencé. Impossible de changer de couleur.")
+        # Actualise l'interface
+        self.label.config(text = f"Tour de {self.joueur_actuel.nom}")
+        self.surligner_joueur(self.joueur_actuel)
 
     def verifier_gagnant(self, x, y):
-        directions = [(1, 0), (1,1), (0, 1), (-1, 1), (-1,0), (-1, -1), (0,-1), (1,-1)]#on regarde toutes les directions possible
+        directions = [(1, 0), (1,1), (0, 1), (-1, 1), (-1,0), (-1, -1), (0,-1), (1,-1)]
+        #on regarde toutes les directions possible
         for dir_x, dir_y in directions:
-            pions_aligne = 0 #on créer un compteur points_aligne initialement à 0
-            for i in range(4): #on regarde 4 pionts qui sont dans la même direction
-                pos_x = x + dir_x*i #on regarde toutes les directions x ainsi que toutes les directions autour de x
-                pos_y = y + dir_y*i #on regarde toutes les directions y ainsi que toutes les directions autour de y
-                if 0 <= pos_x < self.taille[0] and 0 <= pos_y < self.taille[1]: #si ils ne sont pas en dehors de la grille
-                    if self.pions[pos_x][pos_y].joueur == self.joueur_actuel: #si ils sont du meme joueur
-                        pions_aligne += 1  #on ajoute 1 au compteur points aligné
+            # On crée un compteur points_aligne initialement à 0
+            pions_aligne = 0
+            # On regarde 4 pions qui sont dans la même direction (dir_x, dir_y)
+            for i in range(4):
+                pos_x = x + dir_x*i
+                pos_y = y + dir_y*i
+                if 0 <= pos_x < self.taille[0] and 0 <= pos_y < self.taille[1]: # Si ils ne sont pas en dehors de la grille
+                    if self.pions[pos_x][pos_y].joueur == self.joueur_actuel: # & Si ils sont du meme joueur
+                        pions_aligne += 1 # On ajoute 1 au compteur points aligné
+
             # Si 4 pions sont alignés, le joueur a gagné
             if pions_aligne==4:
                 return True
     
-    def show_player_label(self, actuel):
+    def surligner_joueur(self, actuel):
         for joueur in self.joueurs:
             if actuel == joueur:
-                joueur.label.config(bg = joueur.couleur) #met le label joueur qui doit jouer surligné en sa couleur lorsque c'est sont tour
+                # Met le label joueur qui doit jouer surligné en sa couleur lorsque c'est sont tour
+                joueur.afficher_couleur(True)
             else:
-                joueur.label.config(bg = "SystemButtonFace")#Met le label joueur a qui ce n'est pas le tour de la couleur de base
-    
+                # Met le label joueur a qui ce n'est pas le tour de la couleur de base
+                joueur.afficher_couleur(False)
+
+    def partie_finie(self):
+        self.debut = False
+        
+        # réactivation des boutons de couleurs
+        for player in self.joueurs:
+            player.btn_couleur.config(state='normal')
+        
     def afficher_gagnant(self, joueur):
+        self.label.config(text="") # enlever le texte d'informations
         if joueur:
-            print("palced")
-            self.started = False
-            self.center_message.config(text=f"{self.joueur_actuel.nom} a gagné!", fg = self.joueur_actuel.couleur)#le joueur qui a gagné est le joueur qui vient de placer le pion, donc le joueur actuel est appelé pour la victoire
-            self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)#le message est placé au centre de l'écran
+            # afficher le nom du gagnant
+            gagnant = self.joueur_actuel
+            self.message_centre.config(text=f"{gagnant.nom} a gagné!", fg = gagnant.couleur)
+            #le message est placé au centre de l'écran
+            self.message_centre.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            
+            self.partie_finie()
         else:
-            self.center_message.place_forget()
-            print("forgor")
+            # cacher message du gagnant
+            self.message_centre.place_forget()
         
 
         

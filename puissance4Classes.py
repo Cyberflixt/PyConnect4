@@ -12,15 +12,35 @@ class Joueur:
         self.nom = f'Joueur {i+1}'
 
         self.label = None # label tkinter du nom du joueur
-        self.label_pion = None # label tkinter du nombre de pions
+        self.label_pions = None # label tkinter du nombre de pions
+        self.btn_couleur = None # label tkinter du nombre de pions
         
         colors = ["red", "yellow"]
         self.couleur = colors[i]
 
+    def rafraichir_pions(self):
+        self.label_pions.config(text = f"Pions restants: {self.pions_restants}")
+
     def enlever_pion(self):
         self.pions_restants -= 1
-        self.label_pion.config(text = f"Pions restants: {self.pions_restants}")
+        self.rafraichir_pions()
         return self.pions_restants
+
+    def choisir_couleur(self):
+        if not self.jeu.debut:
+            couleur = askcolor(title=f"Choisir une couleur pour {self.nom}")[1]
+            if couleur:
+                self.couleur = couleur
+                self.afficher_couleur(True)
+        else:
+            self.jeu.label.config(text="La partie a déjà commencé. Impossible de changer de couleur.")
+
+    def afficher_couleur(self, afficher):
+        # Affiche ou non la couleur du joueur sur son nom
+        if afficher:
+            self.label.config(bg = self.couleur)
+        else:
+            self.label.config(bg = "SystemButtonFace")
 
 class Pion:
     def __init__(self, canvas, x,y):
