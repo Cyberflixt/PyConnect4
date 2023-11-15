@@ -62,7 +62,7 @@ class Puissance4:
         self.create_gui()
 
     def creer_pion(self, x,y, couleur):
-        px = x * self.taille_pion + 60
+        px = x * self.taille_pion + 145
         py = y * self.taille_pion + 60
         pion = self.canvas.create_oval(
             px,
@@ -157,6 +157,9 @@ class Puissance4:
             self.pions[x][y] = self.current_player
             self.creer_pion(x,y, self.colors[self.current_player])
             self.remaining_pions[self.current_player] -= 1
+            print(self.remaining_pions[self.current_player])
+            
+
 
             # le pion placé a-t'il permit de gagner?
             if self.verifier_gagnant(x,y):
