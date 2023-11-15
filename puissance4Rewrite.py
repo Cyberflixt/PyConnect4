@@ -157,6 +157,8 @@ class Puissance4:
             self.pions[x][y] = self.current_player
             self.creer_pion(x,y, self.colors[self.current_player])
             self.remaining_pions[self.current_player] -= 1
+            print(self.remaining_pions[self.current_player])
+            
 
             # le pion placé a-t'il permit de gagner?
             if self.verifier_gagnant(x,y):
