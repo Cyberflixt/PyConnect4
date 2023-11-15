@@ -38,7 +38,7 @@ class Accueil:
         puissance4 = Puissance4()  # Démarrer le jeu Puissance 4
     
     def start_online_game(self):
-        # Ajouter la logique pour le jeu en ligne ici
+        # 
         pass
 
 class Puissance4:
@@ -187,15 +187,15 @@ class Puissance4:
             self.label.config(text="La partie a déjà commencé. Impossible de changer de couleur.")
 
     def verifier_gagnant(self, x, y):
-        directions = [(1, 0), (1,1), (0, 1), (-1, 1), (-1,0), (-1, -1), (0,-1), (1,-1)]
+        directions = [(1, 0), (1,1), (0, 1), (-1, 1), (-1,0), (-1, -1), (0,-1), (1,-1)]#on regarde toutes les directions possible
         for dir_x, dir_y in directions:
-            pions_aligne = 0
-            for i in range(4):
-                pos_x = x + dir_x*i
-                pos_y = y + dir_y*i
-                if 0 <= pos_x < self.taille[0] and 0 <= pos_y < self.taille[1]:
-                    if self.pions[pos_x][pos_y] == self.current_player:
-                        pions_aligne += 1
+            pions_aligne = 0 #on créer un compteur points_aligne initialement à 0
+            for i in range(4): #on regarde 4 pionts qui sont dans la même direction
+                pos_x = x + dir_x*i #on regarde toutes les directions x ainsi que toutes les directions autour de x
+                pos_y = y + dir_y*i #on regarde toutes les directions y ainsi que toutes les directions autour de y
+                if 0 <= pos_x < self.taille[0] and 0 <= pos_y < self.taille[1]: #si il sont cotes a cotes
+                    if self.pions[pos_x][pos_y] == self.current_player: #et si ils sont de la même couleur
+                        pions_aligne += 1  #on ajoute 1 au compteur points aligné
                     #break # inutile de continuer si on cherche hors de la grille
                 
             if pions_aligne==4:
@@ -204,14 +204,14 @@ class Puissance4:
     def show_player_label(self, player):
         for p in self.player_labels:
             if p == player:
-                self.player_labels[p].config(bg=self.colors[player])
+                self.player_labels[p].config(bg=self.colors[player]) #met le label joueur qui doit jouer surligné en sa couleur lorsque c'est sont tour
             else:
-                self.player_labels[p].config(bg="SystemButtonFace")
+                self.player_labels[p].config(bg="SystemButtonFace")#Met le label joueur a qui ce n'est pas le tour de la couleur de base
     
     def afficher_gagnant(self):
-        self.center_message.config(text=f"Joueur {self.current_player} a gagné!", fg=self.colors[self.current_player])
-        self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        self.canvas.unbind("<Button-1>")
+        self.center_message.config(text=f"Joueur {self.current_player} a gagné!", fg=self.colors[self.current_player])#le joueur qui a gagné est le joueur qui vient de placer le pion, donc le joueur actuel est appelé pour la victoire
+        self.center_message.place(relx=0.5, rely=0.5, anchor=tk.CENTER)#le message est placé au centre de l'écran
+        self.canvas.unbind("<Button-1>") #on empeche le joueur de placer des pions lorsque l'écran de victoire est actif
     
 
 if __name__ == "__main__":
