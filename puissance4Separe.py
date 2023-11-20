@@ -22,15 +22,15 @@ class Accueil:
         
         # Bouton "Jouer Local"
         img_btn_local = tk.PhotoImage(file = "btnLocal.png")
-        btn_local = tk.Button(self.fen, image = img_btn_local, command=self.demarrer_local)
+        btn_local = tk.Button(self.fen, image = img_btn_local, command=self.demarrer_local, bd=0)
         btn_local.image = img_btn_local
         btn_local.pack()
         
         # Bouton "Jouer En Ligne"
         img_btn_internet = tk.PhotoImage(file = "btnOnline.png")
-        btn_internet = tk.Button(self.fen, image = img_btn_internet, command=self.demarrer_internet)
+        btn_internet = tk.Button(self.fen, image = img_btn_internet, command=self.demarrer_internet, bd=0)
         btn_internet.image = img_btn_internet
-        btn_internet.pack()
+        btn_internet.pack(pady=10)
     
     def demarrer_local(self):
         self.fen.destroy()  # Fermer la fenêtre d'accueil

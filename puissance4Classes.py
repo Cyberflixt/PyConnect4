@@ -57,7 +57,7 @@ class Pion:
         px = self.x * self.taille_pion + 145
         py = self.y * self.taille_pion + 60
         
-        couleur = "white"
+        couleur = "#CCCCCC"
         if self.joueur:
             couleur = self.joueur.couleur
         
@@ -66,7 +66,7 @@ class Pion:
             py,
             px + self.taille_pion,
             py + self.taille_pion,
-            outline = "black",
+            outline = couleur,
             fill = couleur
         )
         return pion
@@ -75,7 +75,7 @@ class Pion:
         couleur = joueur.couleur
         
         self.joueur = joueur
-        self.canvas.itemconfig(self.image, fill = couleur)
+        self.canvas.itemconfig(self.image, fill = couleur, outline = "black")
 
         return self.joueur.enlever_pion()
 
