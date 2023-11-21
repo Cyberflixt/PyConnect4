@@ -31,13 +31,23 @@ class Accueil:
         btn_internet = tk.Button(self.fen, image = img_btn_internet, command=self.demarrer_internet, bd=0)
         btn_internet.image = img_btn_internet
         btn_internet.pack(pady=10)
+
+        
+        # Bouton Fermer
+        img_btn_close = tk.PhotoImage(file = "btnClose.png")
+        btn_local = tk.Button(self.fen, image = img_btn_close, command=self.fermer, bd=0)
+        btn_local.image = img_btn_close
+        btn_local.place(relx=0, rely=0)
+
+    def fermer(self):
+        self.fen.destroy()
     
     def demarrer_local(self):
-        self.fen.destroy()  # Fermer la fenêtre d'accueil
+        self.fermer()  # Fermer la fenêtre d'accueil
         jeu = Jeu()  # Démarrer le jeu Puissance 4
     
     def demarrer_internet(self):
-        self.fen.destroy()  # Fermer la fenêtre d'accueil
+        self.fermer()  # Fermer la fenêtre d'accueil
         jeu = Jeu(True)  # Démarrer le jeu Puissance 4
 
 class Jeu:
@@ -120,11 +130,21 @@ class Jeu:
         # Message centré (affiché uniquement pour annoncer le gagnant)
         self.message_centre = tk.Label(self.fen, text="", font=("Arial", 20), bg="white", relief=tk.SOLID, borderwidth=2)
 
+        # Bouton Retour
+        img_btn_retour = tk.PhotoImage(file = "btnRetour.png")
+        btn_retour = tk.Button(self.fen, image = img_btn_retour, command=self.fermer, bd=0)
+        btn_retour.image = img_btn_retour
+        btn_retour.place(relx=0, rely=0)
+        
         # Remplit le canvas d'emplacements vides
         self.vider_pions()
 
         #self.fen.geometry("800x700") # Taille initiale de la fenêtre
         self.fen.mainloop()
+
+    def fermer(self):
+        self.fen.destroy()
+        Accueil()
 
     def supprimer_pions(self):
         for col in self.pions:

@@ -19,6 +19,7 @@ class Joueur:
         self.couleur = colors[i]
 
     def rafraichir_pions(self):
+        """Actualise le texte du nombre de pions restants"""
         self.label_pions.config(text = f"Pions restants: {self.pions_restants}")
 
     def enlever_pion(self):
