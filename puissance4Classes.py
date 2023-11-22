@@ -2,8 +2,6 @@
 import tkinter as tk
 from tkinter.colorchooser import askcolor
 
-references = [] # tkinter supprime les images, si elles ne sont pas stockés, ez
-
 class Joueur:
     def __init__(self, jeu, i):
         self.i = i

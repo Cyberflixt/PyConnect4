@@ -9,19 +9,24 @@ class Connection:
         self.initialiser()
 
     def traiter_serveur(client):
+        """Recoit les informations du serveur"""
         os.system(f'title {client.status[1]} id={client.id}')
         if client.data:
             print(client.data)
 
+    """
     def boucle_envoie(self):
         if client.valide:
-            #donnée = input('\nSend data:')
+            donnée = input('\nSend data:')
             client.envoyer(donnée)
+    """
 
     def initialiser(self):
         # Serveur du puissance 4 (host sur replit)
         client = Client('https://transfer.cyberflixt.repl.co')
         client.cycle(self.traiter_serveur)
+
+    
 
     def chercher_match(self):
         pass
