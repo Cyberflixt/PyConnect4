@@ -2,6 +2,9 @@
 import tkinter as tk
 from tkinter.colorchooser import askcolor
 from puissance4Classes import *
+from puissance4Connection import Connection
+
+connection = Connection()
 
 class Accueil:
     def __init__(self):
@@ -177,8 +180,11 @@ class Jeu:
             self.afficher_gagnant(False) # cache le gagnant précédant
             
             # Désactiver le changement de couleur
-            for player in self.joueurs:
-                player.btn_couleur.config(state=tk.DISABLED)
+            for joueur in self.joueurs:
+                joueur.btn_couleur.config(state=tk.DISABLED)
+                # on redonne les pions à chaque joueurs
+                joueur.redonner_pion()
+                joueur.rafraichir_pions()
 
             # Passage au tour du premier joueur
             self.joueur_actuel = self.joueurs[1]
@@ -200,21 +206,29 @@ class Jeu:
         if y >= 0:
             # alors on place le pion
             pion = self.pions[x][y]
-            pions_restant = pion.changer_joueur(self.joueur_actuel)
+            pions_restants = pion.changer_joueur(self.joueur_actuel)
             
             # le pion placé a-t'il permit de gagner?
             if self.verifier_gagnant(x,y):
                 self.afficher_gagnant(self.joueur_actuel) # joueur à gagné
-
-            # pas de pion en reserve?
-            elif pions_restant == 0:
-                # match nul
-                self.label.config(text="Match nul!")
             else:
-                # tour suivant
-                self.tour_suivant()
-    
+                # vérifier match nul si tout les joueurs n'ont plus de pions en reserve
+                nul = True
+                for joueur in self.joueurs:
+                    if joueur.pions_restants > 0:
+                        nul = False
+                
+                if nul:
+                    self.afficher_match_nul()
+                else:
+                    # tour suivant
+                    self.tour_suivant()
+
     def tour_suivant(self):
+        # Si le mode est en ligne, on attends le tour de l'autre joueur
+        if self.internet:
+            connection.attendre_tour(self, self.joueur_actuel.i)
+        
         # Passage au joueur suivant
         i = 1 - self.joueur_actuel.i
         self.joueur_actuel = self.joueurs[i]
@@ -256,20 +270,30 @@ class Jeu:
         # réactivation des boutons de couleurs
         for player in self.joueurs:
             player.btn_couleur.config(state='normal')
+
+    def afficher_message(self, texte, couleur = 'black'):
+        self.message_centre.config(text=texte, fg = couleur)
+        #le message est placé au centre de l'écran
+        self.message_centre.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
     def afficher_gagnant(self, joueur):
         self.label.config(text="") # enlever le texte d'informations
         if joueur:
             # afficher le nom du gagnant
             gagnant = self.joueur_actuel
-            self.message_centre.config(text=f"{gagnant.nom} a gagné!", fg = gagnant.couleur)
-            #le message est placé au centre de l'écran
-            self.message_centre.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            self.afficher_message(f"{gagnant.nom} a gagné!", gagnant.couleur)
             
             self.partie_finie()
         else:
             # cacher message du gagnant
             self.message_centre.place_forget()
+
+    def afficher_match_nul(self):
+        self.label.config(text="Match nul!")
+        self.afficher_message("Match nul!")
+        self.partie_finie()
+        
+
         
 
         

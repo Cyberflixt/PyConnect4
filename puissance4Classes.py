@@ -8,7 +8,6 @@ class Joueur:
     def __init__(self, jeu, i):
         self.i = i
         self.jeu = jeu
-        self.pions_restants = 21
         self.nom = f'Joueur {i+1}'
 
         self.label = None # label tkinter du nom du joueur
@@ -18,9 +17,15 @@ class Joueur:
         colors = ["red", "yellow"]
         self.couleur = colors[i]
 
+        self.redonner_pion()
+
+    def redonner_pion(self):
+        self.pions_restants = 21
+
     def rafraichir_pions(self):
         """Actualise le texte du nombre de pions restants"""
-        self.label_pions.config(text = f"Pions restants: {self.pions_restants}")
+        if self.label_pions:
+            self.label_pions.config(text = f"Pions restants: {self.pions_restants}")
 
     def enlever_pion(self):
         self.pions_restants -= 1

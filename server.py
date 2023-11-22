@@ -77,7 +77,7 @@ class Client():
 
     def cycle(self, fonction):
         """Répete la fonction donnée avec pour paramêtre les nouvelles informations du serveur
-        /!\ Exécuté en paralèlle"""
+        /!\ Exécuté en paralèlle (pour ne pas arreter le reste du code)"""
         t = threading.Thread(
             target = self.cycleAsync,
             args = [fonction]
