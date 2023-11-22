@@ -173,7 +173,48 @@ class Jeu:
             return -1 # On renvoie -1 pour un match nul
         
 
+######################################################################
+
+
+class ControleJeu:
+    def __init__(self, affichage_jeu):
+        self.affichage = affichage_jeu
+
+        # Quand la sourie bouge, on prévisualise la position où l'on peut poser un pion
+        affichage_jeu.fen.bind(
+            '<Motion>',
+            lambda event: self.mouvement_sourie(event.x)
+        )
         
+        # Quand on clique, on pose un pion
+        affichage_jeu.fen.bind(
+            '<Button-1>',
+            lambda event: self.clique_sourie(event.x)
+        )
+
+    def colonne_grille(self, px):
+        """position de la sourie dans la grille"""
+        return math.floor((px-self.affichage.grille_x)/self.affichage.taille_pion)
+        
+    def mouvement_sourie(self, px):
+        """Fonction appelé lors d'un mouvement de sourie,
+        --> Prévisualisation de la position où placer"""
+
+        x = self.colonne_grille(px)
+
+        self.affichage.previsualisation_colonne(x)
+
+    def clique_sourie(self, px):
+        """Fonction appelé lors d'un clique de sourie
+        --> Placement d'un pion sur la colonne cliquée"""
+
+        x = self.colonne_grille(px)
+
+        self.affichage.placer_colonne(x)
+
+
+######################################################################
+
 
 class AffichageJeu:
     def __init__(self, fen, internet = False):
@@ -184,6 +225,7 @@ class AffichageJeu:
         
         # Utilisation de l'objet jeu
         self.jeu = Jeu(internet)
+        self.controle = ControleJeu(self)
         
         
         # Changement du titre "local" ou "en ligne"
@@ -212,8 +254,6 @@ class AffichageJeu:
         self.en_jeu = False
 
         # Initialiser
-        self.fen.bind('<Motion>', lambda event: self.previsualisation_colonne(event.x))
-        self.fen.bind('<Button-1>', lambda event: self.clique_sourie(event.x))
         self.create_gui()
 
     def position_grille(self, x,y):
@@ -225,14 +265,10 @@ class AffichageJeu:
 
         return px,py
 
-    def previsualisation_colonne(self, px):
-        """Fonction appelé lors d'un mouvement de sourie,
-        Prévisualisation de la position où placer"""
+    def previsualisation_colonne(self, x):
+        """Prévisualisation de la position où placer dans une colonne"""
         
         if self.en_jeu:
-            # position de la sourie dans la grille
-            x = math.floor((px-self.grille_x)/self.taille_pion)
-
             # supprimer la visualisation précédante
             if self.pion_visualisation:
                 self.canvas.delete(self.pion_visualisation)
@@ -248,27 +284,13 @@ class AffichageJeu:
                 # Affichage de l'image de visualisation de la position
                 pion = self.canvas.create_image(px, py, image = self.pion_img_visual, anchor = "nw")
                 self.pion_visualisation = pion
-        
-    
-    def clique_sourie(self, px):
-        """Fonction appelé lors d'un clique de sourie
-        Placement d'un pion sur la colonne cliquée"""
-        
-        if self.en_jeu:
-
-            # position de la sourie dans la grille
-            x = math.floor((px-self.grille_x)/self.taille_pion)
-
-            self.placer_colonne(x)
-
-            # actualiser la prévisualisation de la colonne
-            self.previsualisation_colonne(px)
 
     def placer_colonne(self, x):
         """Place un pion dans la colonne X de la grille de jeu"""
-        
+
+        # La position est-elle jouable ? (non-bloqué)
         y = self.jeu.placer_pion(x)
-        if y is not None: # La position est-elle jouable (non-bloqué)
+        if self.en_jeu and not(y is None):
             
             # ajout du pion dans la liste d'image du joueur
             couleur = self.couleurs[self.jeu.joueur_actuel]
@@ -287,6 +309,9 @@ class AffichageJeu:
             else:
                 # Victoire du joueur: gagnant
                 self.afficher_gagnant(True)
+            
+            # actualiser la prévisualisation de la colonne
+            self.previsualisation_colonne(x)
     
 
     def create_gui(self):
