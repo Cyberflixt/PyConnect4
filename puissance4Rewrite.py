@@ -1,7 +1,6 @@
 
 import tkinter as tk
 from tkinter.colorchooser import askcolor
-from puissance4Classes import *
 import random
 import math
 #from puissance4Connection import Connection
