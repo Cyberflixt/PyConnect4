@@ -4,7 +4,7 @@ import time
 import os
 
 def traiter_serveur(client):
-    os.system(f'title {client.status[1]} id={client.id}')
+    os.system(f'title {client.status[1]} id={client.id} recu={client.recu} freq={client.freq}')
     if client.data:
         print(client.data)
 

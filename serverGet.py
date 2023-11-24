@@ -7,6 +7,19 @@ import os
 import json
 import urllib.parse
 
+modeBypass = False
+
+"""
+from get_bypass import Bypass
+
+bypass = Bypass()
+
+if modeBypass:
+    print('Starting bypass')
+    bypass.start()
+    print('Loaded bypass')
+"""
+
 class Client():
     def __init__(self, url):
         """Crée un nouveau client afin de communiquer au serveur"""
@@ -15,6 +28,7 @@ class Client():
         self.url = url
         self.envois = []
         self.delai = 1
+        self.recu = False
 
         # dernier résultat
         self.json = {}
@@ -39,11 +53,23 @@ class Client():
         enc = urllib.parse.quote_plus(json.dumps(info))
         url = self.url + '?data=' + enc
         print(url)
-        r = requests.get(url)
-        print(r)
+
+        # Get Request en bypassant le wifi de l'école ou non
+        if modeBypass:
+            r = bypass.get(url)
+        else:
+            r = requests.get(url)
+            
         if r.status_code == 200:
-            res = r.json()
             # Résultat sous format de dictionnaire
+            res = r.json()
+
+            if 'res' in res:
+                if res['res'] == '0':
+                    # Erreur de resultat
+                    self.recu = False
+                    return self
+            self.recu = True
 
             # Garder l'indentifiant donné par le serveur
             if 'id' in res:
@@ -84,6 +110,7 @@ class Client():
     def cycle(self, fonction):
         """Répete la fonction donnée avec pour paramêtre les nouvelles informations du serveur
         /!\\ Exécuté en paralèlle (pour ne pas arreter le reste du code)"""
+        
         t = threading.Thread(
             target = self.cycleAsync,
             args = [fonction]
@@ -92,30 +119,29 @@ class Client():
 
     def envoyer(self, info):
         """Envoie l'information donnée au prochain cycle"""
+        
         self.envois.append(info)
 
+    def test():
+        def traiter_serveur(client):
+            os.system(f'title {client.status[1]} id={client.id}')
+            if client.data:
+                print(client.data)
+
+        def boucle_envoie():
+            if client.valide:
+                donnée = input('\nSend data:')
+                client.envoyer(donnée)
+            
+            time.sleep(1)
+            boucle_envoie()
+
+        input('CLIENT')
+
+        client = Client('https://transfer.cyberflixt.repl.co')
+        client.cycle(traiter_serveur)
+
+        boucle_envoie()
 
 
-"""
-def traiter_serveur(a):
-    res = a['res']
-    if res:
-        print('\nres:', res)
-
-input('CLIENT')
-
-client = Client()
-client.cycle(traiter_serveur)
-
-print('Connection...')
-
-while True:
-    if client.valide:
-        r = input('\nsend data:')
-        client.envoyer(r)
-    
-    time.sleep(1)
-
-os.system('pause')
-"""
-
+Client.test()
