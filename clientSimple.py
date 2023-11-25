@@ -18,7 +18,7 @@ def boucle_envoie():
 
 input('CLIENT')
 
-client = Client('https://transfer.cyberflixt.repl.co')
+client = Client('https://transfer.cyberflixt.repl.co', delai = 0)
 client.cycle(traiter_serveur)
 
 boucle_envoie()
