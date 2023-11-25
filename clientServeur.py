@@ -1,11 +1,7 @@
 
 import requests
-import time
-import random
-import threading
-#import os
-import json
-import urllib.parse
+import time, threading
+import json, urllib.parse
 
 def lerp(a,b,t):
     """Interpolation linéaire"""
@@ -14,20 +10,22 @@ def lerp(a,b,t):
 class Client():
     def __init__(self, url, **kwargs):
         """Crée un nouveau client afin de communiquer au serveur"""
-        
+
+        # Paramêtres
         self.delai = .5 # temps entre les requetes
-        
+        self.methode = 'POST'
+
+        # Attributs par défaut
         self.id = None
         self.url = url
         self.recu = False
-        self.methode = 'POST'
         self.envois = [] # informations à envoyer
         self.timeout = 2 # temps max d'une requete
         self.freq = '...' # estimation de frequence d'envoie
         self.freqs = 2
         self.attentes = 0
 
-        # dernier résultat
+        # Attributs du dernier résultat reçu
         self.json = {}
         self.valide = False # Connecté avec un autre utilisateur
         self.status = (-1, 'Non connecté') # information sur la connection
@@ -36,7 +34,6 @@ class Client():
 
         # Remplace les attributs par les arguments donnés
         for k in kwargs:
-            #self[k] = kwargs[k]
             setattr(self, k, kwargs[k])
 
     def actualiser(self, envois = None):
@@ -58,12 +55,14 @@ class Client():
         self.attentes += 1
         r = False
         if self.methode == 'POST':
+            # POST, on passe les données en JSON
             try:
                 r = requests.post(self.url, json = info, timeout = self.timeout)
             except Exception:
                 err = 'Timeout'
-        else: # GET
-            # Si on utilise GET, on passe les données par l'url,
+            
+        elif self.methode == 'GET':
+            # GET, on passe les données par l'url,
             # en les encryptants en texte HTML
             enc = urllib.parse.quote_plus(json.dumps(info))
             urlGet = self.url + '?data=' + enc
@@ -73,9 +72,10 @@ class Client():
                 err = 'Timeout'
         
         if r and r.status_code == 200:
+            # Résultat correct
             self.sauvegarde(r)
         else:
-            # Erreur dans le code du serveur
+            # Erreur dans la requete au serveur
             self.recu = False
             self.status = (0, "Erreur du serveur")
             print(r.status_code if r else err,'- Erreur du serveur!')
@@ -129,11 +129,13 @@ class Client():
         self.marche = False
     
     def cycleAsync(self, fonction):
-        """Répete la fonction donnée avec pour paramêtre les nouvelles informations du serveur"""
+        """Répete la fonction donnée en passant les nouvelles informations du serveur"""
 
         self.marche = True
         while self.marche:
+            # On prends les nouvelles informations
             self.actualiser(self.envois)
+            # Puis on les envoient dans la fonction souhaitée
             fonction(self)
 
             time.sleep(self.delai)

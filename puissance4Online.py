@@ -119,6 +119,10 @@ class Jeu:
     def tour_suivant(self):
         """Passe le tour au joueur suivant"""
         
+        # Si le mode est en ligne, on attends le tour de l'autre joueur
+        #if self.internet:
+            #connection.attendre_tour(self, self.joueur_actuel.i)
+        
         # Passage au joueur suivant
         self.joueur_actuel = 1-self.joueur_actuel
     
