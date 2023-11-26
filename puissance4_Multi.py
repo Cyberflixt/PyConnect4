@@ -6,7 +6,7 @@ from tkinter.colorchooser import askcolor
 
 from puissance4_Jeu import Jeu
 from puissance4_Accueil import Accueil
-
+from puissance4_Serveur import Client
 
 ######################################################################
 

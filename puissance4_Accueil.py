@@ -49,6 +49,8 @@ class Accueil:
         btn_local.image = img_btn_close
         btn_local.place(relx=0, rely=0)
 
+        self.fen.mainloop()
+
     def fermer(self):
         self.fen.destroy()
     

@@ -1,5 +1,5 @@
 
-from puissance4_serveur import Client
+from puissance4_Serveur import Client
 import time
 import os
 
