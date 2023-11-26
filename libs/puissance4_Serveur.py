@@ -1,10 +1,9 @@
 
-import requests
+# Code du serveur https://replit.com/@Cyberflixt/transfer
+
+#import requests as req
 import time, threading
 import json, urllib.parse
-
-from libs.puissance4_Bypass import Bypass
-
 
 def lerp(a,b,t):
     """Interpolation linéaire"""
@@ -29,6 +28,7 @@ class Client():
         self.attentes = 0
         self.cycle_token = 0
         self.bypass = False
+        self.req = None
 
         # Attributs du dernier résultat reçu
         self.json = {}
@@ -41,23 +41,36 @@ class Client():
         for k in kwargs:
             setattr(self, k, kwargs[k])
 
+        # Ne pas charger les librairies spéciales si le bypass n'est pas activé
         if self.bypass:
+            from libs.puissance4_Bypass import Bypass
             self.bypass = Bypass()
+
+    def start(self):
+        """
+        On importe requests, une librairie qui non-installée par défaut
+        uniquement si elle doit être utilisée,
+        afin que le mode local marche dans tout les cas
+        """
+        if not self.req:
+            import requests
+            self.req = requests
 
     def get(self, info):
         """Obtention des informations du serveur avec la méthode choisie"""
         r = False
         err = None
+
+        self.start()
         
         if self.methode == 'POST' and not self.bypass:
             # POST, on passe les données en JSON
-            print('Getting post')
             try:
-                r = requests.post(self.url, json = info, timeout = self.timeout)
+                r = self.req.post(self.url, json = info, timeout = self.timeout)
             except Exception:
                 err = 'Timeout'
             
-        elif self.methode == 'GET':
+        else:
             # GET, on passe les données par l'url,
             # en les encryptants en texte HTML
             
@@ -65,16 +78,15 @@ class Client():
             urlGet = self.url + '?data=' + enc
 
             if self.bypass:
-                print('Getting bypass')
                 try:
                     r = self.bypass.get(urlGet)
                 except Exception:
                     # Recommencer sans le bypass
                     self.bypass = False
+                    print('Echec du bypass')
             else:
-                print('Getting get')
                 try:
-                    r = requests.get(urlGet)
+                    r = self.req.get(urlGet)
                 except Exception:
                     err = 'Timeout'
         return r,err
@@ -106,7 +118,7 @@ class Client():
             # Erreur dans la requete au serveur
             self.recu = False
             self.status = (0, "Erreur du serveur")
-            print(r.status_code if r else err,'- Erreur du serveur!')
+            print(r.status_code if r else err,'- Erreur du serveur! Resutat:',r)
 
         # On enleve un de la file d'attente    
         self.attentes -= 1

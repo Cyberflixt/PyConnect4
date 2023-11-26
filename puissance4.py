@@ -10,11 +10,8 @@ from libs.puissance4_Jeu import Jeu
 from libs.puissance4_Accueil import Menu_Accueil
 from libs.puissance4_Serveur import Client
 
+
 ######################################################################
-
-
-# Création du client au serveur
-client = Client('https://transfer.cyberflixt.repl.co', delai = 0, bypass = False)
 
 
 ### CONTROLES DU JEU
@@ -135,7 +132,7 @@ class Affichage_Jeu:
     def couleur_aleatoire(self):
         """Renvoie un code couleur HTML aléatoire"""
         
-        l = "3456789ABCDEF"
+        l = "456789ABCDEF"
         s = "#"
         for i in range(6):
             s += random.choice(l)
@@ -620,13 +617,27 @@ def menu_suivant(fen, menu_precedant, internet):
     
     if internet:
         # Lancé avec internet
+        # --> Lance le Menu_Attente puis Affichage_Jeu
         Menu_Attente(fen, menu_precedant, Affichage_Jeu)
     else:
         # Lancé en local
+        # --> Lance l'Affichage_Jeu
         Affichage_Jeu(fen, menu_precedant, False)
+
         
+def initialisation(**options):
+    global client
+    
+    # Création du client au serveur
+    client = Client(
+        'https://transfer.cyberflixt.repl.co',
+        **options
+    )
+
+    Menu_Accueil(None, menu_suivant)
 
 
+# Execution par défaut:
 if __name__ == "__main__":
-    accueil = Menu_Accueil(None, menu_suivant)
+    initialisation(delai = 0)
 

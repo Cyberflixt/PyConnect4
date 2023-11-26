@@ -1,5 +1,6 @@
 
 import tkinter as tk
+import os
 
 class Menu_Accueil:
     def __init__(self, fen, menu_suivant):
@@ -18,7 +19,7 @@ class Menu_Accueil:
         self.fen.title("Accueil")
         
         self.create_gui()
-    
+        
     def create_gui(self):
         """Création de l'apparence du menu principale"""
         
@@ -39,10 +40,16 @@ class Menu_Accueil:
         
         # Bouton "Jouer En Ligne"
         img_btn_internet = tk.PhotoImage(file = "assets/btnOnline.png")
-        btn_internet = tk.Button(self.fen, image = img_btn_internet, command=self.demarrer_internet, bd=0)
+        if self.internet():
+            btn_internet = tk.Button(self.fen, image = img_btn_internet,
+                                     command=self.demarrer_internet, bd=0)
+        else:
+            btn_internet = tk.Button(self.fen, image = img_btn_internet,
+                                     command=self.demarrer_internet, bd=0,
+                                     )
+            btn_internet['state'] = 'disabled'
         btn_internet.image = img_btn_internet
         btn_internet.pack(pady=10)
-
         
         # Bouton Fermer
         img_btn_close = tk.PhotoImage(file = "assets/btnClose.png")
@@ -51,13 +58,24 @@ class Menu_Accueil:
         btn_local.place(relx=0, rely=0)
 
         if self.nouvelle_fen:
+            self.nouvelle_fen = False
             self.fen.mainloop()
+        
+    def internet(self):
+        """Le joueur peut il jouer en ligne? (requests installé?)"""
+        try:
+            import requests
+            return True
+        except Exception:
+            return False
 
     def fermer(self):
         self.fen.destroy()
     
     def demarrer_local(self):
-        jeu = self.menu_suivant(self.fen, Menu_Accueil, False) # Démarrer le jeu Puissance 4
+        """Démarrer le jeu Puissance 4 sans internet"""
+        jeu = self.menu_suivant(self.fen, Menu_Accueil, False)
     
     def demarrer_internet(self):
-        jeu = self.menu_suivant(self.fen, Menu_Accueil, True) # Démarrer le jeu Puissance 4
+        """Démarrer le jeu Puissance 4 avec internet activé"""
+        jeu = self.menu_suivant(self.fen, Menu_Accueil, True)

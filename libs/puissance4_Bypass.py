@@ -23,9 +23,14 @@ class Resultat:
     def json(self):
         return json.loads(self.data)
 
+    def __str__(self):
+        return f'Resultat de requete ({self.status_code}): {self.data}'
+    def __repr__(self):
+        return str(self)
+
 class Bypass:
     def __init__(self):
-        pass
+        self.driver = None
 
     def start(self):
         """Initialisation du driver de recherche"""
@@ -45,20 +50,23 @@ class Bypass:
         self.driver = webdriver.Chrome(options=options)
         print('Webdriver chargé')
         
-        stealth(self.driver,
-                languages=["en-US", "en"],
-                vendor="Google Inc.",
-                platform="Win32",
-                webgl_vendor="Intel Inc.",
-                renderer="Intel Iris OpenGL Engine",
-                fix_hairline=True,
-                )
+        stealth(
+            self.driver,
+            languages=["en-US", "en"],
+            vendor="Google Inc.",
+            platform="Win32",
+            webgl_vendor="Intel Inc.",
+            renderer="Intel Iris OpenGL Engine",
+            fix_hairline=True,
+        )
 
         #print(self.get("https://transfer.cyberflixt.repl.co/"))
 
     def get(self, url):
         """Obtention du texte d'une page"""
         # On fait charger la page internet
+        if not self.driver:
+            self.start()
         self.driver.get(url)
         
         # Attendre que la page charge
