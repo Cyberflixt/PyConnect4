@@ -1,189 +1,41 @@
 
+import math
+import random
 import tkinter as tk
 from tkinter.colorchooser import askcolor
-import random
-import math
 
-class Accueil:
-    def __init__(self, fen = None):
-        """Menu d'accueil afin de choisir le mode de jeu"""
-        
-        # Création ou réutilisation de la fenêtre tkinter
-        if fen is None:
-            self.fen = tk.Tk()
-            self.fen.attributes('-fullscreen', True)
-        else:
-            self.fen = fen
-        self.fen.title("Accueil")
-        
-        self.create_gui()
-    
-    def create_gui(self):
-        """Création de l'apparence du menu principale"""
-        
-        for elem in self.fen.winfo_children():
-            elem.destroy()
-        
-        # Image du titre du jeu au centre
-        image = tk.PhotoImage(file="assets/menu.png") 
-        image_menu = tk.Label(self.fen, image=image)
-        image_menu.image = image
-        image_menu.pack()
-        
-        # Bouton "Jouer Local"
-        img_btn_local = tk.PhotoImage(file = "assets/btnLocal.png")
-        btn_local = tk.Button(self.fen, image = img_btn_local, command=self.demarrer_local, bd=0)
-        btn_local.image = img_btn_local
-        btn_local.pack()
-        
-        # Bouton "Jouer En Ligne"
-        img_btn_internet = tk.PhotoImage(file = "assets/btnOnline.png")
-        btn_internet = tk.Button(self.fen, image = img_btn_internet, command=self.demarrer_internet, bd=0)
-        btn_internet.image = img_btn_internet
-        btn_internet.pack(pady=10)
+from puissance4_Jeu import Jeu
+from puissance4_Accueil import Accueil
 
-        
-        # Bouton Fermer
-        img_btn_close = tk.PhotoImage(file = "assets/btnClose.png")
-        btn_local = tk.Button(self.fen, image = img_btn_close, command=self.fermer, bd=0)
-        btn_local.image = img_btn_close
-        btn_local.place(relx=0, rely=0)
-
-    def fermer(self):
-        self.fen.destroy()
-    
-    def demarrer_local(self):
-        jeu = AffichageJeu(self.fen) # Démarrer le jeu Puissance 4
-    
-    def demarrer_internet(self):
-        jeu = AffichageJeu(self.fen, True) # Démarrer le jeu Puissance 4
-
-class Jeu:
-    def __init__(self, fen, internet = False):
-        """Classe Jeu contenant les attributs et méthodes nécéssaires au fonctionnent basique du jeu"""
-        
-        self.internet = internet
-
-        # Taille de la grille de jeu
-        self.taille = [7,6]
-
-        # Tableau de tableaux, remplit quand la partie commence
-        self.pions = []
-        
-        self.joueur_actuel = 0
-        self.pions_joueurs = [21, 21] # pions maximum des joueurs
-        
-        self.initialiser()
-    
-    def initialiser(self):
-        """Initialise le tableau des pions"""
-
-        # Remplissage de la liste pions par des -1
-        self.pions = []
-        for x in range(self.taille[0]):
-            col = []
-            for y in range(self.taille[1]):
-                col.append(-1)
-            self.pions.append(col)
-
-        # Joueur aléatoire entre 0 et 1
-        self.joueur_actuel = random.randint(0,1)
-        self.pions_joueurs = [21, 21]
-
-    def position_colonne(self, x):
-        if 0 <= x < self.taille[0]:
-            # On cherche la position y libre en partant du bas
-            y = self.taille[1]-1
-            while y>=0 and self.pions[x][y] != -1:
-                y -= 1
-
-            # Si le y trouvé n'est pas en dehors de la grille, on le renvoie
-            if y>=0:
-                return y
-        
-    def placer_pion(self, x):
-        """Place un pion dans la colonne X, renvoie l'ordonné où le pion a été posé"""
-
-        y = self.position_colonne(x)
-
-        # on vérifie que la position est jouable
-        if y is not None:
-            
-            # Alors on place le pion
-            self.pions[x][y] = self.joueur_actuel
-            # On enleve un pion au joueur
-            self.pions_joueurs[self.joueur_actuel] -= 1
-            
-            return y
-
-    def tour_suivant(self):
-        """Passe le tour au joueur suivant"""
-        
-        # Passage au joueur suivant
-        self.joueur_actuel = 1-self.joueur_actuel
-    
-    def verifier_match_nul(self):
-        """Verification si le match est nul (aucun pions restants)"""
-        
-        # Un joueur a-t'il encore des pions?
-        for pions in self.pions_joueurs:
-            if pions > 0:
-                return False # pas match nul
-        
-        return True # match nul
-
-    def verifier_gagnant(self, x, y):
-        """Vérification si le pion placé en (X;Y) à fait gagné un joueur"""
-        directions = [(1, 0), (1,1), (0, 1), (-1, 1)]
-        #on regarde toutes les directions possible
-        for dir_x, dir_y in directions:
-            # On crée un compteur points_aligne initialement à 0
-            pions_aligne = 0
-            # On regarde 4 pions qui sont dans la même direction (dir_x, dir_y)
-            for i in range(-3,4):
-
-                # On vérifie l'alignement avec les coordonnés plus loin dans la même direction
-                pos_x = x + dir_x*i
-                pos_y = y + dir_y*i
-                
-                if 0 <= pos_x < self.taille[0] and 0 <= pos_y < self.taille[1]: # Si ils ne sont pas en dehors de la grille
-                    if self.pions[pos_x][pos_y] == self.joueur_actuel: # & Si ils sont du meme joueur
-                        pions_aligne += 1 # On ajoute 1 au compteur points aligné
-
-                    # Sinon, on remet les pions alignés à 0
-                    else:
-                        pions_aligne = 0
-                else:
-                    pions_aligne = 0
-
-                # Si 4 pions sont alignés, le joueur a gagné
-                if pions_aligne==4:
-                    return self.joueur_actuel # On renvoie le joueur ayant gagné
-
-        # Sinon, vérifier si c'est match nul
-        if self.verifier_match_nul():
-            return -1 # On renvoie -1 pour un match nul
-        
 
 ######################################################################
 
 
-class ControleJeu:
+# CONTROLES DU JEU
+
+
+class Controles_Jeu:
     def __init__(self, affichage_jeu):
         self.affichage = affichage_jeu
 
         # Quand la sourie bouge, on prévisualise la position où l'on peut poser un pion
-        affichage_jeu.fen.bind(
+        self.bind_sourie = affichage_jeu.fen.bind(
             '<Motion>',
             lambda event: self.mouvement_sourie(event.x)
         )
         
         # Quand on clique, on pose un pion
-        affichage_jeu.fen.bind(
+        self.bind_clique = affichage_jeu.fen.bind(
             '<Button-1>',
             lambda event: self.clique_sourie(event.x)
         )
-
+        
+    def fermer(self):
+        """Déconnection les evenements"""
+        fen = self.affichage.fen
+        fen.unbind('<Motion>', self.bind_sourie)
+        fen.unbind('<Button-1>', self.bind_clique)
+        
     def colonne_grille(self, px):
         """Colonne de la sourie dans la grille"""
         # (position x dans la grille divisé par la taille d'un pion)
@@ -211,7 +63,10 @@ class ControleJeu:
 ######################################################################
 
 
-class AffichageJeu:
+# AFFICHAGE DU JEU
+
+
+class Affichage_Jeu:
     def __init__(self, fen, internet = False):
         """Controle le jeu par une gui tkinter"""
 
@@ -220,8 +75,7 @@ class AffichageJeu:
         
         # Utilisation de l'objet jeu
         self.jeu = Jeu(internet)
-        self.controle = ControleJeu(self)
-        
+        self.controles = Controles_Jeu(self)
         
         # Changement du titre "local" ou "en ligne"
         self.internet = internet # mode en ligne
@@ -249,7 +103,7 @@ class AffichageJeu:
         self.en_jeu = False
 
         # Initialiser
-        self.create_gui()
+        self.creer_gui()
 
     def position_grille(self, x,y):
         """Donne la position en pixel des coordonnés dans la grille"""
@@ -264,8 +118,9 @@ class AffichageJeu:
         """Prévisualisation de la position où placer dans une colonne"""
         
         if self.en_jeu:
-            # supprimer la visualisation précédante
+            # supprimer la visualisation précédante si elle existe
             if self.pion_visualisation:
+            #if self.pion_visualisation in self.canvas.find_all():
                 self.canvas.delete(self.pion_visualisation)
             
             # visualiser la position où le pion sera placé
@@ -283,33 +138,34 @@ class AffichageJeu:
     def placer_colonne(self, x):
         """Place un pion dans la colonne X de la grille de jeu"""
 
-        # La position est-elle jouable ? (non-bloqué)
-        y = self.jeu.placer_pion(x)
-        if self.en_jeu and not(y is None):
-            
-            # ajout du pion dans la liste d'image du joueur
-            couleur = self.couleurs[self.jeu.joueur_actuel]
-            pion = self.creer_image_pion(x, y, couleur)
-            self.pions_img[self.jeu.joueur_actuel].append(pion)
+        if self.en_jeu:
+            # La position est-elle jouable ? (non-bloqué)
+            y = self.jeu.placer_pion(x)
+            if y is not None:
+                
+                # ajout du pion dans la liste d'image du joueur
+                couleur = self.couleurs[self.jeu.joueur_actuel]
+                pion = self.creer_image_pion(x, y, couleur)
+                self.pions_img[self.jeu.joueur_actuel].append(pion)
 
-            gagnant = self.jeu.verifier_gagnant(x, y)
-            if gagnant is None:
-                # Pas de fin, passer au tour suivant
-                self.tour_suivant()
+                gagnant = self.jeu.verifier_gagnant(x, y)
+                if gagnant is None:
+                    # Pas de fin, passer au tour suivant
+                    self.tour_suivant()
+                    
+                elif gagnant == -1:
+                    # Match nul
+                    self.afficher_match_nul()
+                    
+                else:
+                    # Victoire du joueur: gagnant
+                    self.afficher_gagnant(True)
                 
-            elif gagnant == -1:
-                # Match nul
-                self.afficher_match_nul()
-                
-            else:
-                # Victoire du joueur: gagnant
-                self.afficher_gagnant(True)
-            
-            # actualiser la prévisualisation de la colonne
-            self.previsualisation_colonne(x)
+                # actualiser la prévisualisation de la colonne
+                self.previsualisation_colonne(x)
     
 
-    def create_gui(self):
+    def creer_gui(self):
         """Crée l'interface utilisateur"""
 
         for elem in self.fen.winfo_children():
@@ -411,7 +267,12 @@ class AffichageJeu:
 
     def fermer(self):
         """Ferme le jeu et retourne au menu principale"""
-        Accueil(self.fen)
+        
+        self.partie_finie() # Arreter la partie
+        self.controles.fermer() # Arreter les controles
+
+        # Lancer le menu principal
+        Accueil(Affichage_Jeu, self.fen)
 
     def vider_grille(self):
         """Supprime les pions placés"""
@@ -508,10 +369,9 @@ class AffichageJeu:
     
     def partie_finie(self):
         self.en_jeu = False
-        
+
 
 
 if __name__ == "__main__":
-    accueil = Accueil()
-
+    accueil = Accueil(Affichage_Jeu)
 
