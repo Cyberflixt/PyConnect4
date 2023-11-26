@@ -6,19 +6,18 @@ import platform
 import tkinter as tk
 from tkinter.colorchooser import askcolor
 
-from puissance4_Jeu import Jeu
-from puissance4_Accueil import Menu_Accueil
-from puissance4_Serveur import Client
-
+from libs.puissance4_Jeu import Jeu
+from libs.puissance4_Accueil import Menu_Accueil
+from libs.puissance4_Serveur import Client
 
 ######################################################################
 
 
 # Création du client au serveur
-client = Client('https://transfer.cyberflixt.repl.co', delai = 0)
+client = Client('https://transfer.cyberflixt.repl.co', delai = 0, bypass = False)
 
 
-# CONTROLES DU JEU
+### CONTROLES DU JEU
 
 
 class Controles_Jeu:
@@ -70,54 +69,8 @@ class Controles_Jeu:
 ######################################################################
 
 
-# AFFICHAGE DU JEU
+### AFFICHAGE DU JEU
 
-def traiter_serveur_jeu(client, affichage):
-    """Fonction appelée lorsque une information du serveur est reçu en jeu"""
-
-    # Si la connection est valide
-    if client.valide:
-        affichage.internet_timeout_tick = False
-
-        for data in client.data:
-            # Nouvelles informations reçues
-
-            # Changement de la couleur
-            if 'couleur' in data:
-                affichage.couleurs[1] = data['couleur']
-                affichage.rafraichir_couleur(1)
-
-            # Joueur prêt à commencer
-            if 'commencer' in data:
-                affichage.internet_commencer_autre = data['commencer']
-
-                # Si le joueur est déjà prêt, on réappuit
-                if not affichage.internet_joueur_determine:
-                    if affichage.internet_commencer_self:
-                        affichage.commencer_partie()
-                    else:
-                        affichage.label.config(text="Deuxième joueur prêt.")
-
-            # Joueur a placé un pion
-            if 'placer' in data:
-                x = data['placer']
-                affichage.jeu.joueur_actuel = 1
-                affichage.placer_colonne(x)
-
-            # Nom du joueur
-            if 'name' in data:
-                nom = data['name']
-                affichage.joueurs_nom[1] = nom
-                affichage.rafraichir_noms()
-            
-    else:
-        # Connection interrompue
-        if not affichage.internet_timeout_tick:
-            affichage.internet_timeout_tick = time.time()
-
-        # Interrompue pendant plus que 3s (internet_timeout)
-        if time.time() - affichage.internet_timeout_tick > affichage.internet_timeout:
-            affichage.fermer()
 
 class Affichage_Jeu:
     def __init__(self, fen, menu_precedent, internet):
@@ -443,28 +396,31 @@ class Affichage_Jeu:
 
     def commencer_partie(self):
         """Initialise la partie, détermine quel joueur joue en premier"""
+        
         if not self.en_jeu:
             if self.internet and not self.internet_joueur_determine:
                 # Avec internet, on attends et on envoie un nombre aléatoire pour déterminer qui joue en premier
-                x = random.randint(1,999999999)
-                self.internet_commencer_self = x
-                
+                if not self.internet_commencer_self:
+                    x = random.randint(1,999999999)
+                    self.internet_commencer_self = x
+
+                # On regarde si le deuxième joueur est prêt
                 if self.internet_commencer_autre:
                     # Deuxième joueur à confirmer
-                    if self.internet_commencer_autre!=x:
+                    if self.internet_commencer_autre != self.internet_commencer_self:
                         # On compare notre nombre aléatoire et celui de l'autre joueur pour voir qui commence
                         commencer = self.internet_commencer_self > self.internet_commencer_autre
                         self.internet_commencer_tour = 0 if commencer else 1
                         self.internet_joueur_determine = True
 
                         # On envoie notre nombre pour que l'autre joueur fasse de même
-                        client.envoyer({'commencer': x})
+                        client.envoyer({'commencer': self.internet_commencer_self})
 
                     # On réitère la fonction
                     self.commencer_partie()
                 else:
                     # Premier joueur à confirmer
-                    client.envoyer({'commencer': x})
+                    client.envoyer({'commencer': self.internet_commencer_self})
                     self.label.config(text="Attente du deuxième joueur...")
                 
             else:
@@ -483,6 +439,7 @@ class Affichage_Jeu:
                 # Passage au tour du premier joueur
                 self.tour_suivant()
         else:
+            # Déjà en jeu
             self.label.config(text="La partie a déjà commencé.")
     
     def tour_suivant(self):
@@ -543,6 +500,57 @@ class Affichage_Jeu:
         self.internet_joueur_determine = False
         self.internet_commencer_autre = False
         self.internet_commencer_self = False
+
+
+### Requete internet
+
+
+def traiter_serveur_jeu(client, affichage):
+    """Fonction appelée lorsque une information du serveur est reçu en jeu"""
+
+    # Si la connection est valide
+    if client.valide:
+        affichage.internet_timeout_tick = False
+
+        for data in client.data:
+            # Nouvelles informations reçues
+
+            # Changement de la couleur
+            if 'couleur' in data:
+                affichage.couleurs[1] = data['couleur']
+                affichage.rafraichir_couleur(1)
+
+            # Joueur prêt à commencer
+            if 'commencer' in data:
+                affichage.internet_commencer_autre = data['commencer']
+
+                # Si le joueur est déjà prêt, on réappuit
+                if not affichage.internet_joueur_determine:
+                    if affichage.internet_commencer_self:
+                        affichage.commencer_partie()
+                    else:
+                        affichage.label.config(text="Deuxième joueur prêt.")
+
+            # Joueur a placé un pion
+            if 'placer' in data:
+                x = data['placer']
+                affichage.jeu.joueur_actuel = 1
+                affichage.placer_colonne(x)
+
+            # Nom du joueur
+            if 'name' in data:
+                nom = data['name']
+                affichage.joueurs_nom[1] = nom
+                affichage.rafraichir_noms()
+            
+    else:
+        # Connection interrompue
+        if not affichage.internet_timeout_tick:
+            affichage.internet_timeout_tick = time.time()
+
+        # Interrompue pendant plus que 3s (internet_timeout)
+        if time.time() - affichage.internet_timeout_tick > affichage.internet_timeout:
+            affichage.fermer()
 
 
 ######################################################################

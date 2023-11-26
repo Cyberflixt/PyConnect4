@@ -3,6 +3,9 @@ import requests
 import time, threading
 import json, urllib.parse
 
+from libs.puissance4_Bypass import Bypass
+
+
 def lerp(a,b,t):
     """Interpolation linéaire"""
     return a+(b-a)*t
@@ -25,6 +28,7 @@ class Client():
         self.freqs = 2
         self.attentes = 0
         self.cycle_token = 0
+        self.bypass = False
 
         # Attributs du dernier résultat reçu
         self.json = {}
@@ -36,6 +40,44 @@ class Client():
         # Remplace les attributs par les arguments donnés
         for k in kwargs:
             setattr(self, k, kwargs[k])
+
+        if self.bypass:
+            self.bypass = Bypass()
+
+    def get(self, info):
+        """Obtention des informations du serveur avec la méthode choisie"""
+        r = False
+        err = None
+        
+        if self.methode == 'POST' and not self.bypass:
+            # POST, on passe les données en JSON
+            print('Getting post')
+            try:
+                r = requests.post(self.url, json = info, timeout = self.timeout)
+            except Exception:
+                err = 'Timeout'
+            
+        elif self.methode == 'GET':
+            # GET, on passe les données par l'url,
+            # en les encryptants en texte HTML
+            
+            enc = urllib.parse.quote_plus(json.dumps(info))
+            urlGet = self.url + '?data=' + enc
+
+            if self.bypass:
+                print('Getting bypass')
+                try:
+                    r = self.bypass.get(urlGet)
+                except Exception:
+                    # Recommencer sans le bypass
+                    self.bypass = False
+            else:
+                print('Getting get')
+                try:
+                    r = requests.get(urlGet)
+                except Exception:
+                    err = 'Timeout'
+        return r,err
 
     def actualiser(self):
         """Renvoie les nouvelles informations provenant du serveur"""
@@ -52,23 +94,7 @@ class Client():
         
         # Envoie de la requête
         self.attentes += 1
-        r = False
-        if self.methode == 'POST':
-            # POST, on passe les données en JSON
-            try:
-                r = requests.post(self.url, json = info, timeout = self.timeout)
-            except Exception:
-                err = 'Timeout'
-            
-        elif self.methode == 'GET':
-            # GET, on passe les données par l'url,
-            # en les encryptants en texte HTML
-            enc = urllib.parse.quote_plus(json.dumps(info))
-            urlGet = self.url + '?data=' + enc
-            try:
-                r = requests.get(urlGet)
-            except Exception:
-                err = 'Timeout'
+        r, err = self.get(info)
         
         # Valeur des resultats par défaut pour une utilisation plus simple
         self.data = {}

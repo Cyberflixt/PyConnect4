@@ -4,8 +4,8 @@ import random
 import tkinter as tk
 from tkinter.colorchooser import askcolor
 
-from puissance4_Jeu import Jeu
-from puissance4_Accueil import Menu_Accueil
+from libs.puissance4_Jeu import Jeu
+from libs.puissance4_Accueil import Menu_Accueil
 
 
 ######################################################################
