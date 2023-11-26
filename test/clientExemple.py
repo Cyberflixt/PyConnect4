@@ -11,14 +11,15 @@ def traiter_serveur(client):
     os.system('title '+titre)
     
     # Affichage des données reçu
-    if client.data:
-        print(client.data)
+    for data in client.data:
+        if 'txt' in data:
+            print(data['txt'])
 
 def boucle_envoie():
     # Envoie d'un texte au serveur grâce à "input"
     if client.valide:
         donnée = input('\nSend data:\n')
-        client.envoyer(donnée)
+        client.envoyer({'txt': donnée})
     else:
         time.sleep(1)
 

@@ -1,14 +1,15 @@
 
 import tkinter as tk
 
-class Accueil:
-    def __init__(self, suivant, fen = None):
+class Menu_Accueil:
+    def __init__(self, fen, menu_suivant):
         """Menu d'accueil afin de choisir le mode de jeu"""
 
         # Fenêtre suivante à afficher
-        self.suivant = suivant
+        self.menu_suivant = menu_suivant
         
         # Création ou réutilisation de la fenêtre tkinter
+        self.nouvelle_fen = fen is None
         if fen is None:
             self.fen = tk.Tk()
             self.fen.attributes('-fullscreen', True)
@@ -49,13 +50,14 @@ class Accueil:
         btn_local.image = img_btn_close
         btn_local.place(relx=0, rely=0)
 
-        self.fen.mainloop()
+        if self.nouvelle_fen:
+            self.fen.mainloop()
 
     def fermer(self):
         self.fen.destroy()
     
     def demarrer_local(self):
-        jeu = self.suivant(self.fen) # Démarrer le jeu Puissance 4
+        jeu = self.menu_suivant(self.fen, Menu_Accueil, False) # Démarrer le jeu Puissance 4
     
     def demarrer_internet(self):
-        jeu = self.suivant(self.fen, True) # Démarrer le jeu Puissance 4
+        jeu = self.menu_suivant(self.fen, Menu_Accueil, True) # Démarrer le jeu Puissance 4

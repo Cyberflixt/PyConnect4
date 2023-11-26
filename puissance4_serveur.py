@@ -19,11 +19,12 @@ class Client():
         self.id = None
         self.url = url
         self.recu = False
-        self.envois = [] # informations à envoyer
+        self.envois = {} # informations à envoyer
         self.timeout = 2 # temps max d'une requete
         self.freq = '...' # estimation de frequence d'envoie
         self.freqs = 2
         self.attentes = 0
+        self.cycle_token = 0
 
         # Attributs du dernier résultat reçu
         self.json = {}
@@ -36,20 +37,18 @@ class Client():
         for k in kwargs:
             setattr(self, k, kwargs[k])
 
-    def actualiser(self, envois = None):
+    def actualiser(self):
         """Renvoie les nouvelles informations provenant du serveur"""
         if self.attentes > 0:
             return
 
         # On met en forme la requete
-        info = {}
-        if envois:
-            info['data'] = envois
+        info = {'data': self.envois}
         if self.id:
             info['id'] = self.id
         
         # On supprime les anciennes informations
-        self.envois = []
+        self.envois = {}
         
         # Envoie de la requête
         self.attentes += 1
@@ -70,6 +69,9 @@ class Client():
                 r = requests.get(urlGet)
             except Exception:
                 err = 'Timeout'
+        
+        # Valeur des resultats par défaut pour une utilisation plus simple
+        self.data = {}
         
         if r and r.status_code == 200:
             # Résultat correct
@@ -102,8 +104,6 @@ class Client():
             self.id = res['id']
 
         # Mise à jour des information sur le Client
-        # Valeur des resultats par défaut pour une utilisation plus simple
-        self.data = {}
         if 'res' in res:
             self.data = res['res']
 
@@ -126,30 +126,32 @@ class Client():
     
     def stop(self):
         """Arrête la boucle de la fonction cycle"""
-        self.marche = False
+        self.cycle_token += 1
     
-    def cycleAsync(self, fonction):
+    def cycleAsync(self, fonction, *args):
         """Répete la fonction donnée en passant les nouvelles informations du serveur"""
 
-        self.marche = True
-        while self.marche:
+        token = self.cycle_token
+        while token == self.cycle_token:
+            # Si la boucle n'a pas été arrêtée
             # On prends les nouvelles informations
-            self.actualiser(self.envois)
+            self.actualiser()
             # Puis on les envoient dans la fonction souhaitée
-            fonction(self)
+            fonction(self, *args)
 
             time.sleep(self.delai)
 
-    def cycle(self, fonction):
+    def cycle(self, fonction, *args):
         r"""Répete la fonction donnée avec pour paramêtre les nouvelles informations du serveur
         /!\ Exécuté en paralèlle (pour ne pas arreter le reste du code)"""
         t = threading.Thread(
             target = self.cycleAsync,
-            args = [fonction]
+            args = [fonction, *args]
         )
         t.start()
 
-    def envoyer(self, info):
-        """Envoie l'information donnée au prochain cycle"""
-        self.envois.append(info)
+    def envoyer(self, dico):
+        """Envoie des informations d'un dictionaire donné au prochain cycle"""
+        for k in dico:
+            self.envois[k] = dico[k]
         

@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter.colorchooser import askcolor
 
 from puissance4_Jeu import Jeu
-from puissance4_Accueil import Accueil
+from puissance4_Accueil import Menu_Accueil
 
 
 ######################################################################
@@ -67,10 +67,11 @@ class Controles_Jeu:
 
 
 class Affichage_Jeu:
-    def __init__(self, fen, internet = False):
+    def __init__(self, fen, menu_precedent, internet):
         """Controle le jeu par une gui tkinter"""
 
         self.fen = fen # réutilisation de la fenetre tkinter
+        self.menu_precedent = menu_precedent
         self.internet = internet
         
         # Utilisation de l'objet jeu
@@ -272,7 +273,7 @@ class Affichage_Jeu:
         self.controles.fermer() # Arreter les controles
 
         # Lancer le menu principal
-        Accueil(Affichage_Jeu, self.fen)
+        self.menu_precedent(self.fen, Affichage_Jeu)
 
     def vider_grille(self):
         """Supprime les pions placés"""
@@ -373,5 +374,5 @@ class Affichage_Jeu:
 
 
 if __name__ == "__main__":
-    accueil = Accueil(Affichage_Jeu)
+    accueil = Menu_Accueil(None, Affichage_Jeu)
 
