@@ -11,7 +11,7 @@ from selenium_stealth import stealth
 import time
 import json
 
-headless = True
+headless = False
 
 #chrome_path = r'.\chromedriver_win32\chromedriver.exe'
 
