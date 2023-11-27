@@ -7,13 +7,8 @@ passer dans l'url demandé
 
 from selenium import webdriver
 from selenium_stealth import stealth
-#from selenium.webdriver.chrome.service import Service
 import time
 import json
-
-headless = False
-
-#chrome_path = r'.\chromedriver_win32\chromedriver.exe'
 
 class Resultat:
     def __init__(self, data):
@@ -29,23 +24,32 @@ class Resultat:
         return str(self)
 
 class Bypass:
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.driver = None
+        self.starting = False
+        self.headless = False
+
+        for k in kwargs:
+            setattr(self, k, kwargs[k])
+
+        self.start()
 
     def start(self):
         """Initialisation du driver de recherche"""
-        #service = Service(executable_path=chrome_path)
+
+        if self.starting or self.driver:
+            return
         
+        self.starting = True
         options = webdriver.ChromeOptions()
-        #options.add_argument("start-maximized")
 
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
-        if headless:
+        if self.headless:
+            print('Webdriver headless')
             options.add_argument('--headless')
 
-        print('Chargement du webdriver')
-        #driver = webdriver.Chrome(options=options, service=service)
+        print(f'Chargement du webdriver (headless = {self.headless})')
 
         self.driver = webdriver.Chrome(options=options)
         print('Webdriver chargé')
@@ -60,13 +64,10 @@ class Bypass:
             fix_hairline=True,
         )
 
-        #print(self.get("https://transfer.cyberflixt.repl.co/"))
-
     def get(self, url):
         """Obtention du texte d'une page"""
         # On fait charger la page internet
-        if not self.driver:
-            self.start()
+        self.start()
         self.driver.get(url)
         
         # Attendre que la page charge
@@ -82,5 +83,3 @@ class Bypass:
         """Arret du driver de recherche"""
         self.driver.quit()
 
-a = Bypass()
-a.start()

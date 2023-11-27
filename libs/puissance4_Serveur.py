@@ -29,6 +29,7 @@ class Client():
         self.cycle_token = 0
         self.bypass = False
         self.req = None
+        self.headless = False
 
         # Attributs du dernier résultat reçu
         self.json = {}
@@ -44,7 +45,7 @@ class Client():
         # Ne pas charger les librairies spéciales si le bypass n'est pas activé
         if self.bypass:
             from libs.puissance4_Bypass import Bypass
-            self.bypass = Bypass()
+            self.bypass = Bypass(headless = self.headless)
 
     def start(self):
         """
