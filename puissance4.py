@@ -170,11 +170,10 @@ class Affichage_Jeu:
     def previsualisation_supprimer(self):
         """Supprime la visualisation si elle existe"""
         if self.pion_visualisation:
-            #if self.pion_visualisation in self.canvas.find_all():
             self.canvas.delete(self.pion_visualisation)
     
     def tester_colonne(self, x):
-        """Place un pion dans la colonne X de la grille de jeu"""
+        """Teste si l'on peut placer un pion dans la colonne X de la grille de jeu"""
 
         if self.en_jeu:
             # La position est-elle jouable ? (non-bloqué)
@@ -191,7 +190,8 @@ class Affichage_Jeu:
                 self.placer_colonne(x)
     
     def placer_colonne(self, x):
-        """Place un pion"""
+        """Place un pion dans une colonne"""
+        
         y = self.jeu.placer_pion(x)
         
         # ajout du pion dans la liste d'image du joueur

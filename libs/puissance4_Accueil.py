@@ -40,14 +40,13 @@ class Menu_Accueil:
         
         # Bouton "Jouer En Ligne"
         img_btn_internet = tk.PhotoImage(file = "assets/btnOnline.png")
-        if self.internet():
+        btn_internet = tk.Button(self.fen, image = img_btn_internet, command=self.demarrer_internet, bd=0,)
+
+        #Si il n'y a pas d'internet, le bouton n'est pas disponible
+        if not self.internet():
             btn_internet = tk.Button(self.fen, image = img_btn_internet,
                                      command=self.demarrer_internet, bd=0)
-        else:
-            btn_internet = tk.Button(self.fen, image = img_btn_internet,
-                                     command=self.demarrer_internet, bd=0,
-                                     )
-            btn_internet['state'] = 'disabled'
+        
         btn_internet.image = img_btn_internet
         btn_internet.pack(pady=10)
         

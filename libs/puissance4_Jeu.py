@@ -33,6 +33,7 @@ class Jeu:
         self.pions_joueurs = [21, 21]
 
     def position_colonne(self, x):
+        """Renvoie l'ordonné où placer un pion dans une colonne"""
         if 0 <= x < self.taille[0]:
             # On cherche la position y libre en partant du bas
             y = self.taille[1]-1
