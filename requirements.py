@@ -1,4 +1,10 @@
 
+"""
+
+Installe les librairies nécéssaires au fonctionnement complet du jeu
+
+"""
+
 # Installation des libraries optionnelles
 
 import os

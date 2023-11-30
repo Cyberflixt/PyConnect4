@@ -1,4 +1,11 @@
 
+"""
+
+Fichier système du jeu puissance 4
+Permet de placer des poins, vérifier si le jeu est gagné, etc...
+
+"""
+
 import random
 import math
 

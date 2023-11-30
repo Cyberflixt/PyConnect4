@@ -1,4 +1,10 @@
 
+"""
+
+Menu simple de sélection de mode local ou multijoueur
+
+"""
+
 import tkinter as tk
 import os
 
@@ -13,6 +19,7 @@ class Menu_Accueil:
         self.nouvelle_fen = fen is None
         if fen is None:
             self.fen = tk.Tk()
+            self.fen.iconbitmap("assets/icon.ico")
             self.fen.attributes('-fullscreen', True)
         else:
             self.fen = fen

@@ -1,4 +1,11 @@
 
+"""
+
+Fichier principale:
+Controle l'affichage du jeu en utilisant les autres fichiers pythons
+
+"""
+
 import math
 import time
 import random

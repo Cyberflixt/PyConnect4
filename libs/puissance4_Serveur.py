@@ -1,5 +1,17 @@
 
-# Code du serveur https://replit.com/@Cyberflixt/transfer
+"""
+
+Fichier controllant les requêtes au serveur en ligne
+
+Serveur de matchmaking écrit en python avec Flask, hosté sur Replit
+
+Importe uniquement les librairies optionneles seulement
+si existantes sur la machine, afin de ne pas produire d'erreurs
+
+"""
+
+# Code du serveur (aussi en python):
+# https://replit.com/@Cyberflixt/transfer#main.py
 
 #import requests as req
 import time, threading

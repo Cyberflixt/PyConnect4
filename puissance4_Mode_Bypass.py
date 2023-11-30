@@ -1,4 +1,16 @@
 
+"""
+
+### /!\ Pour le wifi de l'école
+
+Variante du programme de base,
+
+Lance le programme avec les paramêtres nécéssaires
+afin de lancer le mode multijoeur avec la librairie selenium
+et d'autres modification au client
+
+"""
+
 # On importe le fichier puissance4 principal
 from puissance4 import initialisation
 

@@ -1,17 +1,20 @@
 
+
+"""
+Alternative à selenium afin d'utiliser le wifi de l'école
+
+Remplace le module Requests si activé
+
+Utilise des GET requests avec les information en json passé dans l'url
+
+Selenium permet d'ouvrir Chromium driver et d'entrer une url
+Et de récuperer son contenue
+"""
+
 from selenium import webdriver
 from selenium_stealth import stealth
 import time
 import json
-
-"""
-Alternative à selenium afin de bypass le wifi de l'école
-Utilise des get requests avec les information en json
-passer dans l'url demandé
-
-Selenium permet d'ouvrir Chromium driver et d'entrer une url
-Et d'éxécuter du javascript
-"""
 
 class Resultat:
     def __init__(self, data):
